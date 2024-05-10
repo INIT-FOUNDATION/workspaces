@@ -67,8 +67,6 @@ export const proxyController = {
         participantId: req.params.participantId,
       };
 
-      console.log(proxyDetails);
-
       const { error } = validateJoinProxy(proxyDetails);
 
       if (error) {
@@ -104,13 +102,20 @@ export const proxyController = {
       }
 
       const proxy = httpProxy.createProxyServer();
+
       req.url = "/";
 
-      const url =
-        environment == "DEV"
-          ? "http://localhost:3000"
-          : `http://${proxyDetails.sessionId}:3000`;
-      proxy.web(req, res, { target: url, ws: true });
+      console.log(req.url);
+      console.log(req.path);
+
+      proxy.web(req, res, {
+        target:
+          environment == "DEV"
+            ? "http://localhost:3000"
+            : `http://${proxyDetails.sessionId}:3000`,
+        ws: true,
+        ignorePath: true,
+      });
     } catch (error) {
       loggerUtils.error(`proxyController :: joinProxy :: ${error}`);
       return res

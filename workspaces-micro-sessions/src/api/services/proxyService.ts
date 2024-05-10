@@ -1,14 +1,21 @@
-import { loggerUtils } from "workspaces-micro-commons";
 import axios from "axios";
+import { loggerUtils } from "workspaces-micro-commons";
+import https from "https";
 import { SessionDetails } from "../../types/custom";
+
+const axiosInstance = axios.create({
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false,
+  }),
+});
 
 export const proxyService = {
   createProxy: async (sessionDetails: SessionDetails, baseUrl: string) => {
     try {
-      await axios.post(baseUrl, sessionDetails);
+      await axiosInstance.post(baseUrl, sessionDetails);
     } catch (error) {
       loggerUtils.error(
-        `proxyService :: proxyService :: sessionId ${JSON.stringify(
+        `proxyService :: createProxy :: sessionId ${JSON.stringify(
           sessionDetails
         )} :: baseUrl ${baseUrl} :: ${error}`
       );
@@ -21,7 +28,7 @@ export const proxyService = {
     baseUrl: string
   ) => {
     try {
-      await axios.post(baseUrl, {
+      await axiosInstance.post(baseUrl, {
         sessionId,
         deletePersistence,
       });

@@ -336,4 +336,20 @@ export const sessionService = {
       throw error;
     }
   },
+  getParticipantsCountByClientId: async (
+    sessionId: string
+  ): Promise<number> => {
+    try {
+      const participantsCount: number =
+        await mongoUtils.countDocuments<IParticipant>(ParticipantModel, {
+          sessionId,
+        });
+      return participantsCount;
+    } catch (error) {
+      loggerUtils.error(
+        `sessionsService :: getParticipantsCountByClientId :: sessionId ${sessionId} :: ${error}`
+      );
+      throw error;
+    }
+  },
 };
