@@ -42,9 +42,7 @@
       "PORT": 5003,
       "HOST": "localhost",
       "MODULE": "workspaces-micro-websocket",
-      "LOG_LEVEL": "info",
-      "WORKSPACES_MONGODB_USERNAME": "root",
-      "WORKSPACES_MONGODB_PASSWORD": "example"
+      "LOG_LEVEL": "info"
     }
   }
 }

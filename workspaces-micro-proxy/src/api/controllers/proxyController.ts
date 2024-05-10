@@ -1,9 +1,16 @@
-
 import { Request, Response } from "express";
 import { proxyService } from "../services/proxyService";
-import { HTTP_STATUS_CODES, envUtils, loggerUtils } from "workspaces-micro-commons";;
+import {
+  HTTP_STATUS_CODES,
+  envUtils,
+  loggerUtils,
+} from "workspaces-micro-commons";
 import { PROXY_ERROR_RESPONSES } from "../../constants";
-import { validateCreateProxy, validateDeleteProxy, validateJoinProxy } from "../../validations";
+import {
+  validateCreateProxy,
+  validateDeleteProxy,
+  validateJoinProxy,
+} from "../../validations";
 import httpProxy from "http-proxy";
 const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "DEV");
 
@@ -27,21 +34,18 @@ export const proxyController = {
           });
       }
 
-      const sessionExists: boolean = await proxyService.sessionExistsById(proxyDetails.sessionId);
+      const imageExists = await proxyService.imageExistsById(
+        proxyDetails.imageId
+      );
 
-      if (!sessionExists)
-        return res
-          .status(HTTP_STATUS_CODES.BAD_REQUEST)
-          .send(PROXY_ERROR_RESPONSES.PROXYERR007);
-
-
-      const imageExists = await proxyService.imageExistsById(proxyDetails.imageExistsById);
-
-      if (!imageExists)
+      if (!imageExists) {
+        loggerUtils.error(
+          "proxyController :: createProxy :: image does not exists"
+        );
         return res
           .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send(PROXY_ERROR_RESPONSES.PROXYERR008);
-
+      }
 
       await proxyService.createProxy(proxyDetails);
 
@@ -58,7 +62,10 @@ export const proxyController = {
   },
   joinProxy: async (req: Request, res: Response) => {
     try {
-      const proxyDetails: any = { sessionId: req.params.sessionId, participantId: req.params.participantId };
+      const proxyDetails: any = {
+        sessionId: req.params.sessionId,
+        participantId: req.params.participantId,
+      };
 
       const { error } = validateJoinProxy(proxyDetails);
 
@@ -75,7 +82,9 @@ export const proxyController = {
           });
       }
 
-      const sessionExists: boolean = await proxyService.sessionExistsById(proxyDetails.sessionId);
+      const sessionExists: boolean = await proxyService.sessionExistsById(
+        proxyDetails.sessionId
+      );
 
       if (!sessionExists) {
         return res
@@ -83,7 +92,8 @@ export const proxyController = {
           .send(PROXY_ERROR_RESPONSES.PROXYERR007);
       }
 
-      const participantExists: boolean = await proxyService.participantExistsById(proxyDetails.participantId);
+      const participantExists: boolean =
+        await proxyService.participantExistsById(proxyDetails.participantId);
 
       if (!participantExists) {
         return res
@@ -92,9 +102,12 @@ export const proxyController = {
       }
 
       const proxy = httpProxy.createProxyServer();
-      req.url = "/"
+      req.url = "/";
 
-      const url = environment == 'DEV' ? 'http://localhost:3000' : `http://${proxyDetails.sessionId}:3000`
+      const url =
+        environment == "DEV"
+          ? "http://localhost:3000"
+          : `http://${proxyDetails.sessionId}:3000`;
       proxy.web(req, res, { target: url, ws: true });
     } catch (error) {
       loggerUtils.error(`proxyController :: joinProxy :: ${error}`);
@@ -123,7 +136,9 @@ export const proxyController = {
           });
       }
 
-      const sessionExists: boolean = await proxyService.sessionExistsById(proxyDetails.sessionId);
+      const sessionExists: boolean = await proxyService.sessionExistsById(
+        proxyDetails.sessionId
+      );
 
       if (!sessionExists)
         return res
@@ -143,4 +158,4 @@ export const proxyController = {
         .send(PROXY_ERROR_RESPONSES.PROXYERR000);
     }
   },
-}
+};

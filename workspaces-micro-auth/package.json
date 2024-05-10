@@ -41,9 +41,7 @@
       "PORT": 5000,
       "HOST": "localhost",
       "MODULE": "workspaces-micro-auth",
-      "LOG_LEVEL": "info",
-      "WORKSPACES_MONGODB_USERNAME": "root",
-      "WORKSPACES_MONGODB_PASSWORD": "example"
+      "LOG_LEVEL": "info"
     }
   }
 }
