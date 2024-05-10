@@ -28,6 +28,11 @@ export const sessionService = {
     sessionExists: boolean
   ) => {
     try {
+      const clientBaseUrl = getStringEnvVariableOrDefault(
+        "WORKSPACESCLIENT_BASE_URL",
+        "http://localhost:3000"
+      );
+
       if (!sessionExists) {
         const agents: IAgent[] = await agentsService.listAgentsByClientId(
           sessionDetails.clientId
@@ -58,13 +63,44 @@ export const sessionService = {
           sessionDetails.imageId = image.imageId;
 
           const availableAgent = availableAgents[0];
+          sessionDetails.agentId = availableAgent.agentId;
+
           const baseUrl = `${availableAgent.sslEnabled ? "https" : "http"}://${
             availableAgent.agentHost
           }:${availableAgent.agentPort}/api/v1/proxy/create`;
 
           await proxyService.createProxy(sessionDetails, baseUrl);
 
-          sessionDetails.agentId = availableAgent.agentId;
+          const participantObj: Partial<IParticipant> = {
+            participantId: randomUUID(),
+            participantName: sessionDetails.participantName,
+            sessionId: sessionDetails.sessionId,
+            role: PARTICIPANT_ROLES.MODERATOR,
+            access: sessionDetails.participantsAccess,
+          };
+
+          await mongoUtils.insertDocument<IParticipant>(
+            ParticipantModel,
+            participantObj
+          );
+
+          const sessionResponse = {
+            sessionId: sessionDetails.sessionId,
+            participantId: participantObj.participantId,
+            participantName: participantObj.participantName,
+            agentHost: availableAgent.agentHost,
+            agentPort: availableAgent.agentPort,
+            sslEnabled: availableAgent.sslEnabled,
+          };
+
+          const jwt = jwtUtils.generateJwt(sessionResponse, CACHE_TTL.ONE_DAY);
+          const clientUrl = `${clientBaseUrl}/${jwt}`;
+
+          return {
+            sessionId: sessionResponse.sessionId,
+            participantId: sessionResponse.participantId,
+            clientUrl,
+          };
         } else {
           loggerUtils.error(
             `sessionService :: createSession :: no available agents are available while creating session`
@@ -76,6 +112,7 @@ export const sessionService = {
       const agents: IAgent[] = await agentsService.getAgentBySessionId(
         sessionDetails.sessionId
       );
+
       if (agents.length == 0) {
         loggerUtils.error(
           `sessionService :: createSession :: no agents are available while joining session`
@@ -89,20 +126,13 @@ export const sessionService = {
         participantId: randomUUID(),
         participantName: sessionDetails.participantName,
         sessionId: sessionDetails.sessionId,
-        role: sessionExists
-          ? PARTICIPANT_ROLES.PARTICIPANT
-          : PARTICIPANT_ROLES.MODERATOR,
+        role: PARTICIPANT_ROLES.PARTICIPANT,
         access: sessionDetails.participantsAccess,
       };
 
       await mongoUtils.insertDocument<IParticipant>(
         ParticipantModel,
         participantObj
-      );
-
-      const clientBaseUrl = getStringEnvVariableOrDefault(
-        "WORKSPACESCLIENT_BASE_URL",
-        "http://localhost:3000"
       );
 
       const sessionResponse = {

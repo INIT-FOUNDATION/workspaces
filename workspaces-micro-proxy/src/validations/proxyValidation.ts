@@ -4,6 +4,7 @@ import { ISession } from "../types/custom";
 export const validateCreateProxy = (proxyDetails: ISession) => {
   const proxyDetailsSchema = Joi.object({
     sessionId: Joi.string().required(),
+    agentId: Joi.string().required(),
     imageId: Joi.string().required(),
     imageName: Joi.string().required(),
     clientId: Joi.string().required(),

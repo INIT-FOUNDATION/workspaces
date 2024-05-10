@@ -67,6 +67,8 @@ export const proxyController = {
         participantId: req.params.participantId,
       };
 
+      console.log(proxyDetails);
+
       const { error } = validateJoinProxy(proxyDetails);
 
       if (error) {

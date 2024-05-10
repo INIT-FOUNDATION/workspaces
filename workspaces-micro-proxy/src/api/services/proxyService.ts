@@ -32,13 +32,7 @@ export const proxyService = {
               CgroupPermissions: "rwm",
             },
           ],
-          Mounts: [
-            {
-              Type: "volume",
-              Source: proxyDetails.sessionId,
-              Target: "/config",
-            },
-          ],
+          Mounts: [],
         },
         Env: [
           "PUID=1000",
@@ -49,12 +43,18 @@ export const proxyService = {
         Image: `${image.imageRepo}:${image.imageTag}`,
       };
 
-      if (environment === "DEV" && createOptions.HostConfig) {
+      if (environment === "DEV" && createOptions.HostConfig)
         createOptions.HostConfig.PortBindings = {
           "3000/tcp": [{ HostPort: "3000" }],
           "3001/tcp": [{ HostPort: "3001" }],
         };
-      }
+
+      if (proxyDetails.saveSession)
+        createOptions.HostConfig?.Mounts?.push({
+          Type: "volume",
+          Source: proxyDetails.sessionId,
+          Target: "/config",
+        });
 
       const container = await docker.createContainer(createOptions);
       await container.start();
