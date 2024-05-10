@@ -1,0 +1,37 @@
+{
+    "name": "cobrowsing-micro-commons",
+    "version": "1.0.0",
+    "description": "Reusable module providing essential utilities and services for microservices architecture",
+    "main": "src/index.ts",
+    "scripts": {
+        "start": "nodemon --exec ts-node src/index.ts",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/narsimachilkuri45/CommonUtilityService.git"
+    },
+    "author": "Narsima Chilkuri",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/narsimachilkuri45/CommonUtilityService/issues"
+    },
+    "homepage": "https://github.com/narsimachilkuri45/CommonUtilityService#readme",
+    "dependencies": {
+        "@types/node": "^20.11.25",
+        "aws-sdk": "^2.1574.0",
+        "dotenv": "^16.4.5",
+        "jsonwebtoken": "^9.0.2",
+        "kafkajs": "^2.2.4",
+        "minio": "^7.1.3",
+        "mongoose": "^8.2.1",
+        "pg": "^8.11.3",
+        "redis": "^4.6.13",
+        "winston": "^3.12.0"
+    },
+    "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.6",
+        "@types/pg": "^8.11.2",
+        "typescript": "^5.4.2"
+    }
+}
