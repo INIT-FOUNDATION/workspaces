@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { CSSProperties, useEffect } from "react";
 
 interface WorkspacesScreenProps {
   sessionId: string;
@@ -37,7 +37,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     };
   }, []);
 
-  return null;
+  return <div style={{ position: "relative", zIndex: "1" }}></div>;
 };
 
 export default WorkspacesScreen;

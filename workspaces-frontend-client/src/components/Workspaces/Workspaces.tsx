@@ -25,6 +25,17 @@ const Workspaces: React.FC = () => {
   const [sessionStatus, setSessionStatus] = useState<number>(0);
   const [access, setAccess] = useState<string>("");
 
+  const randomColor = () => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  const cursorColor = randomColor();
+
   useEffect(() => {
     if (token) {
       const decodedToken = decodeJWTToken(token);
@@ -84,6 +95,7 @@ const Workspaces: React.FC = () => {
               participantId={participantId}
               sessionId={sessionId}
               participantName={participantName}
+              cursorColor={cursorColor}
             />
           )}
         </>
