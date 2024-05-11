@@ -104,21 +104,21 @@ export const websocketService = {
         return;
       }
 
-      const participants: IParticipant[] =
-        await websocketService.getParticipantById(participantId);
+      const interval = setInterval(async () => {
+        const participants: IParticipant[] =
+          await websocketService.getParticipantById(participantId);
 
-      if (!participants || participants.length == 0) {
-        socket.emit(
-          "workspaces_access",
-          JSON.stringify({
-            session_status: SESSIONS_STATUS.ACTIVE,
-            access: "",
-          })
-        );
-        return;
-      }
+        if (!participants || participants.length == 0) {
+          socket.emit(
+            "workspaces_access",
+            JSON.stringify({
+              session_status: SESSIONS_STATUS.ACTIVE,
+              access: "",
+            })
+          );
+          return;
+        }
 
-      setInterval(() => {
         const participant: IParticipant = participants[0];
 
         socket.emit(
@@ -129,6 +129,17 @@ export const websocketService = {
           })
         );
       }, 1000);
+
+      const intervalKey = `WORKSPACES_ACCESS_INTERVAL|${socket.id}`;
+      const intervalKeyResponse = await redisUtils.getKey(intervalKey);
+
+      if (!intervalKeyResponse) {
+        await redisUtils.setKey(
+          intervalKey,
+          interval.toString(),
+          CACHE_TTL.ONE_DAY
+        );
+      }
     } catch (error) {
       loggerUtils.error(
         `websocketService :: handleWorkspacesAccess :: sessionId :: ${sessionId} :: participantId :: ${participantId} :: ${error}`
@@ -139,27 +150,58 @@ export const websocketService = {
   addWorkspacesCursors: async (
     socket: any,
     sessionId: string,
+    participantId: string,
     participantName: string,
     xCoordinate: number,
     yCoordinate: number
   ) => {
     try {
       const key = `PARTICIPANTS_CURSORS|${sessionId}`;
+
+      const existingCursors = await redisUtils.lRangeKey(key, 0, -1);
+      const existingCursorIndex = existingCursors.findIndex((cursor) => {
+        const parsedCursor = JSON.parse(cursor);
+        return parsedCursor.participantId === participantId;
+      });
+
       const coordinates = {
+        participantId,
         participantName,
         socketId: socket.id,
         xCoordinate,
         yCoordinate,
       };
-      await redisUtils.lPushKey(
-        key,
-        JSON.stringify(coordinates),
-        CACHE_TTL.ONE_HOUR
-      );
 
-      const cursors = await redisUtils.lRangeKey(key, 0, -1);
+      if (existingCursorIndex !== -1) {
+        existingCursors[existingCursorIndex] = JSON.stringify(coordinates);
+        await redisUtils.lSet(
+          key,
+          existingCursorIndex,
+          existingCursors[existingCursorIndex]
+        );
+      } else {
+        await redisUtils.lPushKey(
+          key,
+          JSON.stringify(coordinates),
+          CACHE_TTL.ONE_HOUR
+        );
+      }
 
-      socket.emit("workspaces_cursors", JSON.stringify({ cursors }));
+      const interval = setInterval(async () => {
+        const cursors = await redisUtils.lRangeKey(key, 0, -1);
+        socket.emit("workspaces_cursors", JSON.stringify({ cursors }));
+      }, 1000);
+
+      const intervalKey = `WORKSPACES_CURSORS_INTERVAL|${socket.id}`;
+      const intervalKeyResponse = await redisUtils.getKey(intervalKey);
+
+      if (!intervalKeyResponse) {
+        await redisUtils.setKey(
+          intervalKey,
+          interval.toString(),
+          CACHE_TTL.ONE_DAY
+        );
+      }
     } catch (error) {
       loggerUtils.error(
         `websocketService :: handleWorkspacesCursors :: sessionId :: ${sessionId} :: participantName :: ${participantName} :: xCoordinate :: ${xCoordinate} :: yCoordinate :: ${yCoordinate} :: ${error}`
@@ -178,6 +220,34 @@ export const websocketService = {
     } catch (error) {
       loggerUtils.error(
         `websocketService :: removeWorkspaceCursors :: sessionId :: ${sessionId} :: participantName :: ${participantName} :: ${error}`
+      );
+      throw error;
+    }
+  },
+  removeWorkspacesIntervals: async (socketId: string) => {
+    try {
+      const intervalAccessKey = `WORKSPACES_ACCESS_INTERVAL|${socketId}`;
+      const intervalAccessKeyResponse = await redisUtils.getKey(
+        intervalAccessKey
+      );
+
+      if (intervalAccessKeyResponse) {
+        const interval = intervalAccessKeyResponse;
+        clearInterval(parseInt(interval));
+      }
+
+      const intervalCursorsKey = `WORKSPACES_CURSORS_INTERVAL|${socketId}`;
+      const intervalCursorsKeyResponse = await redisUtils.getKey(
+        intervalCursorsKey
+      );
+
+      if (intervalCursorsKeyResponse) {
+        const interval = intervalCursorsKeyResponse;
+        clearInterval(parseInt(interval));
+      }
+    } catch (error) {
+      loggerUtils.error(
+        `websocketService :: removeWorkspacesIntervals :: socketId :: ${socketId} :: ${error}`
       );
       throw error;
     }

@@ -21,6 +21,7 @@ const Workspaces: React.FC = () => {
   const [agentHost, setAgentHost] = useState<string>("");
   const [agentPort, setAgentPort] = useState<string>("");
   const [agentSSLEnabled, setAgentSSLEnabled] = useState<boolean>(false);
+  const [drawCursors, setDrawCursors] = useState<boolean>(false);
   const [sessionStatus, setSessionStatus] = useState<number>(0);
   const [access, setAccess] = useState<string>("");
 
@@ -34,6 +35,7 @@ const Workspaces: React.FC = () => {
         setAgentHost(decodedToken.agentHost);
         setAgentPort(decodedToken.agentPort);
         setAgentSSLEnabled(decodedToken.sslEnabled);
+        setDrawCursors(decodedToken.drawCursors);
       } else {
         console.error("Workspaces :: Invalid Workspaces Token");
       }
@@ -77,11 +79,13 @@ const Workspaces: React.FC = () => {
             agentPort={agentPort}
             agentSSLEnabled={agentSSLEnabled}
           />
-          <Cursors
-            sessionId={sessionId}
-            participantId={participantId}
-            participantName={participantName}
-          />
+          {drawCursors && (
+            <Cursors
+              participantId={participantId}
+              sessionId={sessionId}
+              participantName={participantName}
+            />
+          )}
         </>
       )}
     </>

@@ -86,6 +86,7 @@ export const sessionService = {
 
           const sessionResponse = {
             sessionId: sessionDetails.sessionId,
+            drawCursors: sessionDetails.drawCursors,
             participantId: participantObj.participantId,
             participantName: participantObj.participantName,
             agentHost: availableAgent.agentHost,
@@ -137,6 +138,7 @@ export const sessionService = {
 
       const sessionResponse = {
         sessionId: sessionDetails.sessionId,
+        drawCursors: sessionDetails.drawCursors,
         participantId: participantObj.participantId,
         participantName: participantObj.participantName,
         agentHost: agent.agentHost,

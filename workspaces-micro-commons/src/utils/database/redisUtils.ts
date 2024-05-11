@@ -8,7 +8,10 @@ import {
 } from "../config/envUtils";
 
 const getPrefixKey = () =>
-  getStringEnvVariableOrDefault("WORKSPACES_REDIS_KEYS_PREFIX", "DEV|WORKSPACES|");
+  getStringEnvVariableOrDefault(
+    "WORKSPACES_REDIS_KEYS_PREFIX",
+    "DEV|WORKSPACES|"
+  );
 
 const primaryRedisConfig = {
   url: (() => {
@@ -155,6 +158,23 @@ export async function lPushKey(key: string, value: string, expiry: number = 0) {
   } catch (error) {
     loggerUtils.error(
       `redisUtils :: Error pushing to Redis list with key: ${key}, Error :: ${error}`
+    );
+    throw error;
+  }
+}
+
+export async function lSet(
+  key: string,
+  index: number,
+  value: string,
+  expiry: number = 0
+) {
+  try {
+    await primaryRedisClient.lSet(addPrefix(key), index, value);
+    if (expiry > 0) await primaryRedisClient.expire(addPrefix(key), expiry);
+  } catch (error) {
+    loggerUtils.error(
+      `redisUtils :: Error Setting to Redis list with key: ${key} and index ${index}, Error :: ${error}`
     );
     throw error;
   }

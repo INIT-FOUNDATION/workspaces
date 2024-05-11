@@ -7,6 +7,7 @@ export interface DecodedToken {
   agentHost: string;
   agentPort: string;
   sslEnabled: boolean;
+  drawCursors: boolean;
 }
 
 export const decodeJWTToken = (token: string): DecodedToken | null => {
@@ -19,6 +20,7 @@ export const decodeJWTToken = (token: string): DecodedToken | null => {
       agentHost,
       agentPort,
       sslEnabled,
+      drawCursors,
     } = decodedToken;
     return {
       sessionId,
@@ -27,6 +29,7 @@ export const decodeJWTToken = (token: string): DecodedToken | null => {
       agentHost,
       agentPort,
       sslEnabled,
+      drawCursors,
     };
   } catch (error) {
     console.error(

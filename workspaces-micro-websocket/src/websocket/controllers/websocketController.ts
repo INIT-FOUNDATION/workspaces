@@ -26,6 +26,7 @@ export const websocketController = {
         "workspaces_cursors",
         async (
           sessionId: string,
+          participantId: string,
           participantName: string,
           xCoordinate: number,
           yCoordinate: number
@@ -33,6 +34,7 @@ export const websocketController = {
           websocketService.addWorkspacesCursors(
             socket,
             sessionId,
+            participantId,
             participantName,
             xCoordinate,
             yCoordinate
@@ -54,6 +56,8 @@ export const websocketController = {
       loggerUtils.info(
         `websocketController :: handleSocketDisconnection :: socket disconnected :: socket ${socket.id}`
       );
+
+      await websocketService.removeWorkspacesIntervals(socket.id);
     } catch (error) {
       loggerUtils.info(
         `websocketController :: handleSocketDisconnection :: socket disconnection failed :: socket ${error}`
