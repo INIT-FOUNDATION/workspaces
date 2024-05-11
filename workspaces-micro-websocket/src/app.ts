@@ -22,6 +22,12 @@ const io = new SocketIOServer(server, {
     "WORKSPACES_WS_DEFAULT_PING_TIMEOUT",
     5000
   ),
+  cors: {
+    origin: envUtils.getStringEnvVariableOrDefault(
+      "WORKSPACES_WS_DEFAULT_ORIGINS",
+      "*"
+    ),
+  },
 });
 const PORT = envUtils.getNumberEnvVariableOrDefault("PORT", 5003);
 const MODULE = envUtils.getStringEnvVariableOrDefault(

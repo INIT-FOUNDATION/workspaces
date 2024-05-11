@@ -1,4 +1,9 @@
-import { CACHE_TTL, loggerUtils, mongoUtils, redisUtils } from "workspaces-micro-commons";
+import {
+  CACHE_TTL,
+  loggerUtils,
+  mongoUtils,
+  redisUtils,
+} from "workspaces-micro-commons";
 import { IParticipant, ISession } from "../../types/custom";
 import { ParticipantModel, SessionModel } from "../../models";
 import { SESSIONS_STATUS } from "../../constants/sessionsStatus";
@@ -6,104 +11,174 @@ import { SESSIONS_STATUS } from "../../constants/sessionsStatus";
 export const websocketService = {
   sessionExistsById: async (sessionId: string): Promise<boolean> => {
     try {
-      const exists: boolean = await mongoUtils.existsDocument<ISession>(SessionModel, {
-        sessionId,
-        status: SESSIONS_STATUS.ACTIVE
-      });
+      const exists: boolean = await mongoUtils.existsDocument<ISession>(
+        SessionModel,
+        {
+          sessionId,
+          status: SESSIONS_STATUS.ACTIVE,
+        }
+      );
       return exists;
     } catch (error) {
-      loggerUtils.error(`websocketService :: sessionExistsById :: sessionId :: ${sessionId} :: ${error}`);
+      loggerUtils.error(
+        `websocketService :: sessionExistsById :: sessionId :: ${sessionId} :: ${error}`
+      );
       throw error;
     }
   },
   participantExistsById: async (participantId: string): Promise<boolean> => {
     try {
-      const exists: boolean = await mongoUtils.existsDocument<IParticipant>(ParticipantModel, {
-        participantId,
-      });
+      const exists: boolean = await mongoUtils.existsDocument<IParticipant>(
+        ParticipantModel,
+        {
+          participantId,
+        }
+      );
       return exists;
     } catch (error) {
-      loggerUtils.error(`websocketService :: participantExistsById :: participantId :: ${participantId} :: ${error}`);
+      loggerUtils.error(
+        `websocketService :: participantExistsById :: participantId :: ${participantId} :: ${error}`
+      );
       throw error;
     }
   },
-  getParticipantById: async (participantId: string): Promise<IParticipant[]> => {
+  getParticipantById: async (
+    participantId: string
+  ): Promise<IParticipant[]> => {
     try {
       const key = `PARTICIPANT|${participantId}`;
       const cachedData = await redisUtils.getKey(key);
 
       if (cachedData) {
-        return JSON.parse(cachedData)
+        return JSON.parse(cachedData);
       }
 
-      const participants: IParticipant[] = await mongoUtils.findDocumentsWithOptions<IParticipant>(ParticipantModel, {
-        participantId,
-      }, {
-        _id: 0,
-        __v: 0,
-        createdAt: 0,
-        updatedAt: 0
-      }, {
+      const participants: IParticipant[] =
+        await mongoUtils.findDocumentsWithOptions<IParticipant>(
+          ParticipantModel,
+          {
+            participantId,
+          },
+          {
+            _id: 0,
+            __v: 0,
+            createdAt: 0,
+            updatedAt: 0,
+          },
+          {}
+        );
 
-      });
+      if (participants.length > 0)
+        await redisUtils.setKey(
+          key,
+          JSON.stringify(participants),
+          CACHE_TTL.ONE_HOUR
+        );
 
-      await redisUtils.setKey(key, JSON.stringify(cachedData), CACHE_TTL.ONE_HOUR);
       return participants;
     } catch (error) {
-      loggerUtils.error(`websocketService :: getParticipantById :: participantId :: ${participantId} :: ${error}`);
+      loggerUtils.error(
+        `websocketService :: getParticipantById :: participantId :: ${participantId} :: ${error}`
+      );
       throw error;
     }
   },
-  handleWorkspacesAccess: async (socket: any, sessionId: string, participantId: string) => {
+  handleWorkspacesAccess: async (
+    socket: any,
+    sessionId: string,
+    participantId: string
+  ) => {
     try {
-      const sessionExists: boolean = await websocketService.sessionExistsById(sessionId);
-      if (!sessionExists) socket.emit("workspaces_access", JSON.stringify({
-        session_status: SESSIONS_STATUS.INACTIVE,
-        access: ""
-      }))
+      const sessionExists: boolean = await websocketService.sessionExistsById(
+        sessionId
+      );
 
-      const participants: IParticipant[] = await websocketService.getParticipantById(participantId);
-      if (participants.length == 0) socket.emit("workspaces_access", JSON.stringify({
-        session_status: SESSIONS_STATUS.ACTIVE,
-        access: ""
-      }))
+      if (!sessionExists) {
+        socket.emit(
+          "workspaces_access",
+          JSON.stringify({
+            session_status: SESSIONS_STATUS.INACTIVE,
+            access: "",
+          })
+        );
+        return;
+      }
 
-      const participant: IParticipant = participants[0];
+      const participants: IParticipant[] =
+        await websocketService.getParticipantById(participantId);
 
-      socket.emit("workspaces_access", JSON.stringify({
-        session_status: SESSIONS_STATUS.ACTIVE,
-        access: participant.access
-      }))
+      if (!participants || participants.length == 0) {
+        socket.emit(
+          "workspaces_access",
+          JSON.stringify({
+            session_status: SESSIONS_STATUS.ACTIVE,
+            access: "",
+          })
+        );
+        return;
+      }
+
+      setInterval(() => {
+        const participant: IParticipant = participants[0];
+
+        socket.emit(
+          "workspaces_access",
+          JSON.stringify({
+            session_status: SESSIONS_STATUS.ACTIVE,
+            access: participant.access,
+          })
+        );
+      }, 1000);
     } catch (error) {
-      loggerUtils.error(`websocketService :: handleWorkspacesAccess :: sessionId :: ${sessionId} :: participantId :: ${participantId} :: ${error}`);
+      loggerUtils.error(
+        `websocketService :: handleWorkspacesAccess :: sessionId :: ${sessionId} :: participantId :: ${participantId} :: ${error}`
+      );
       throw error;
     }
   },
-  addWorkspacesCursors: async (socket: any, sessionId: string, participantName: string, xCoordinate: number, yCoordinate: number) => {
+  addWorkspacesCursors: async (
+    socket: any,
+    sessionId: string,
+    participantName: string,
+    xCoordinate: number,
+    yCoordinate: number
+  ) => {
     try {
       const key = `PARTICIPANTS_CURSORS|${sessionId}`;
       const coordinates = {
         participantName,
         socketId: socket.id,
         xCoordinate,
-        yCoordinate
-      }
-      await redisUtils.lPushKey(key, JSON.stringify(coordinates), CACHE_TTL.ONE_HOUR);
+        yCoordinate,
+      };
+      await redisUtils.lPushKey(
+        key,
+        JSON.stringify(coordinates),
+        CACHE_TTL.ONE_HOUR
+      );
 
       const cursors = await redisUtils.lRangeKey(key, 0, -1);
 
-      socket.emit("workspaces_cursors", JSON.stringify({ cursors }))
+      socket.emit("workspaces_cursors", JSON.stringify({ cursors }));
     } catch (error) {
-      loggerUtils.error(`websocketService :: handleWorkspacesCursors :: sessionId :: ${sessionId} :: participantName :: ${participantName} :: xCoordinate :: ${xCoordinate} :: yCoordinate :: ${yCoordinate} :: ${error}`);
+      loggerUtils.error(
+        `websocketService :: handleWorkspacesCursors :: sessionId :: ${sessionId} :: participantName :: ${participantName} :: xCoordinate :: ${xCoordinate} :: yCoordinate :: ${yCoordinate} :: ${error}`
+      );
       throw error;
     }
   },
-  removeWorkspaceCursors: async (socket: any, sessionId: string, participantName: string) => {
+  removeWorkspaceCursors: async (
+    socket: any,
+    sessionId: string,
+    participantName: string
+  ) => {
     try {
       const key = `PARTICIPANTS_CURSORS|${sessionId}`;
       await redisUtils.lRemKey(key, 0, JSON.stringify({ socketId: socket.id }));
     } catch (error) {
-      loggerUtils.error(`websocketService :: removeWorkspaceCursors :: sessionId :: ${sessionId} :: participantName :: ${participantName} :: ${error}`);
+      loggerUtils.error(
+        `websocketService :: removeWorkspaceCursors :: sessionId :: ${sessionId} :: participantName :: ${participantName} :: ${error}`
+      );
       throw error;
     }
   },
