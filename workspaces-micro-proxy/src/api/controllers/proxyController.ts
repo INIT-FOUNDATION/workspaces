@@ -103,18 +103,15 @@ export const proxyController = {
 
       const proxy = httpProxy.createProxyServer();
 
+      req.baseUrl = ""
       req.url = "/";
-
-      console.log(req.url);
-      console.log(req.path);
 
       proxy.web(req, res, {
         target:
           environment == "DEV"
             ? "http://localhost:3000"
             : `http://${proxyDetails.sessionId}:3000`,
-        ws: true,
-        ignorePath: true,
+        ws: true
       });
     } catch (error) {
       loggerUtils.error(`proxyController :: joinProxy :: ${error}`);
