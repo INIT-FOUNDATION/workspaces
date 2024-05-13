@@ -37,7 +37,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     };
   }, []);
 
-  return <div style={{ position: "relative", zIndex: "1" }}></div>;
+  return null;
 };
 
 export default WorkspacesScreen;

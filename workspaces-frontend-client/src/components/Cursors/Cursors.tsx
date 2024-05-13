@@ -38,13 +38,25 @@ const Cursors: React.FC<CursorProps> = ({
 
     const handleMouseMove = (event: MouseEvent) => {
       const { clientX, clientY } = event;
+
+      const workspaceContent = document.documentElement;
+      const workspaceRect = workspaceContent.getBoundingClientRect();
+      const adjustedX = Math.max(
+        Math.min(clientX - workspaceRect.left, workspaceRect.width),
+        0
+      );
+      const adjustedY = Math.max(
+        Math.min(clientY - workspaceRect.top, workspaceRect.height),
+        0
+      );
+
       socket.emit(
         "workspaces_cursors",
         sessionId,
         participantId,
         participantName,
-        clientX,
-        clientY
+        adjustedX,
+        adjustedY
       );
     };
 
