@@ -1,0 +1,846 @@
+{
+	"info": {
+		"_postman_id": "0d0b2bb2-c4b2-4a5d-a8cd-7e961b972cbc",
+		"name": "WORKSPACES",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19179160"
+	},
+	"item": [
+		{
+			"name": "AUTH",
+			"item": [
+				{
+					"name": "Create Client",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clientName\": \"BAMBINOS\",\n    \"sessionsLimit\": 100,\n    \"sessionConcurrencyLimit\": 10,\n    \"accessExpiryDate\": \"2024-05-30\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/auth/client",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"client"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"clientId\": \"bambinos-be56ab3917\",\n        \"clientSecret\": \"g24KWRE47sQ3+9SkYh/4RVlMXmc=\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/auth/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Client",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sessionsLimit\": 102,\n    \"sessionConcurrencyLimit\": 10,\n    \"accessExpiryDate\": \"2024-05-30\",\n    \"isActive\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/auth/client/bambinos1-1bd51c96ea",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"client",
+								"bambinos1-1bd51c96ea"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Client",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/auth/client/bambinos1-1bd51c96ea",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"client",
+								"bambinos1-1bd51c96ea"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Client",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clientName\": \"BAMBINOS1\",\n    \"sessionsLimit\": 100,\n    \"sessionConcurrencyLimit\": 10,\n    \"accessExpiryDate\": \"2024-05-30\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/v1/auth/client/bambinos1-1bd51c96ea",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"client",
+								"bambinos1-1bd51c96ea"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "SESSIONS",
+			"item": [
+				{
+					"name": "IMAGES",
+					"item": [
+						{
+							"name": "Create Image",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4NjI3LCJleHAiOjE3MTUyOTk1Mjd9.BrTMEEnfYDpRUwU960wR2n853SdJZjDYW3E-8sQp0ZI",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/images/create",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"images",
+										"create"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Image",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/images/0bc2a3bd-6d7b-4161-85ca-10512d4ff74b",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"images",
+										"0bc2a3bd-6d7b-4161-85ca-10512d4ff74b"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Images",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/images/list",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"images",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Image",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"imageName\": \"chrome\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/images/0bc2a3bd-6d7b-4161-85ca-10512d4ff74b",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"images",
+										"0bc2a3bd-6d7b-4161-85ca-10512d4ff74b"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Image",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/images/0bc2a3bd-6d7b-4161-85ca-10512d4ff74b",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"images",
+										"0bc2a3bd-6d7b-4161-85ca-10512d4ff74b"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "AGENTS",
+					"item": [
+						{
+							"name": "Create Agent",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zLWJlNTZhYjM5MTciLCJjbGllbnRTZWNyZXQiOiJnMjRLV1JFNDdzUTMrOVNrWWgvNFJWbE1YbWMiLCJpYXQiOjE3MTUzMzQ1MDIsImV4cCI6MTcxNTMzODEwMn0.4F6jZMXDu1vYmlUx84Y68-TXJmTH4qJc6aSaYZjrc7A",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"agentHost\": \"localhost\",\n    \"agentPort\": 5002,\n    \"sslEnabled\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/agents/create",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"agents",
+										"create"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Agent",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"agents",
+										"51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List Agents",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/agents/list",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"agents",
+										"list"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Agent",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"agentPort\": 8081\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"agents",
+										"51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Agent",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:5001/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"api",
+										"v1",
+										"agents",
+										"51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Create Session",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zLWJlNTZhYjM5MTciLCJjbGllbnRTZWNyZXQiOiJnMjRLV1JFNDdzUTMrOVNrWWgvNFJWbE1YbWMiLCJpYXQiOjE3MTU0NjMzMzIsImV4cCI6MTcxNTQ2NjkzMn0.6Bi1ZiR06RAj9_pqWS8Oy8mM1l4knIlzmGEzg52UEdw",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sessionId\": \"3e01fe8d-b6e6-4aea-a33b-f8939f5091c2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/api/v1/sessions/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"v1",
+								"sessions",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Session",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk5NTc0LCJleHAiOjE3MTUzMDA0NzR9.lTadjadtaP8xNISDb-sReD6PJDB8z-P3pVBvrA9p2TQ",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sessionId\": \"6b640059-e4d1-48b9-bd3c-2441ba754fae\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/api/v1/sessions/6b640059-e4d1-48b9-bd3c-2441ba754fae",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"v1",
+								"sessions",
+								"6b640059-e4d1-48b9-bd3c-2441ba754fae"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Sessions",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1MzAwNTY1LCJleHAiOjE3MTUzMDE0NjV9.7nIymEyLwlP8g-wbDndMK3vG_iza65Vu0sDfp2Vpt8g",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sessionId\": \"6b640059-e4d1-48b9-bd3c-2441ba754fae\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/api/v1/sessions/list",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"v1",
+								"sessions",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Permissions",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1MzAwNTY1LCJleHAiOjE3MTUzMDE0NjV9.7nIymEyLwlP8g-wbDndMK3vG_iza65Vu0sDfp2Vpt8g",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"participantId\": \"a573a987-9f87-42ac-894a-49451e5e50bf\",\n    \"access\": \"read\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/api/v1/sessions/setPermissions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"v1",
+								"sessions",
+								"setPermissions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Destroy Session",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1MzAwNTY1LCJleHAiOjE3MTUzMDE0NjV9.7nIymEyLwlP8g-wbDndMK3vG_iza65Vu0sDfp2Vpt8g",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deletePersistence\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5001/api/v1/sessions/127aeb23-a626-4083-83b0-6023787ef096",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5001",
+							"path": [
+								"api",
+								"v1",
+								"sessions",
+								"127aeb23-a626-4083-83b0-6023787ef096"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PROXY (Internal)",
+			"item": [
+				{
+					"name": "Create Proxy",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"sessionId\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n    \"agentId\": \"1ed7c5aa-8b2b-4b92-b4fd-bc82ac39a92d\",\n    \"imageId\": \"db027ff3-3412-4ba9-90d5-1d91f3849c3f\",\n    \"imageName\": \"chrome\",\n    \"clientId\": \"a877e9e1-5f80-4a6a-bb5f-15d07d48c261\",\n    \"timezone\": \"Asia/Kolkata\",\n    \"startUrl\": \"https://www.google.com\",\n    \"sharedMemory\": 1024,\n    \"drawCursors\": true,\n    \"participantsAccess\": \"read_write\",\n    \"participantName\": \"John Doe\",\n    \"saveSession\": true,\n    \"status\": 1\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5002/api/v1/proxy/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5002",
+							"path": [
+								"api",
+								"v1",
+								"proxy",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Proxy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5002/api/v1/proxy/:sessionId/:participantId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5002",
+							"path": [
+								"api",
+								"v1",
+								"proxy",
+								":sessionId",
+								":participantId"
+							],
+							"variable": [
+								{
+									"key": "sessionId",
+									"value": ""
+								},
+								{
+									"key": "participantId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Proxy",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"deletePersistence\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5002/api/v1/proxy/:sessionId",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5002",
+							"path": [
+								"api",
+								"v1",
+								"proxy",
+								":sessionId"
+							],
+							"variable": [
+								{
+									"key": "sessionId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
