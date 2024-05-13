@@ -43,7 +43,7 @@ export const proxyService = {
         Image: `${image.imageRepo}:${image.imageTag}`,
       };
 
-      if (environment === "DEV" && createOptions.HostConfig)
+      if (environment === "Development" && createOptions.HostConfig)
         createOptions.HostConfig.PortBindings = {
           "3000/tcp": [{ HostPort: "3000" }],
           "3001/tcp": [{ HostPort: "3001" }],

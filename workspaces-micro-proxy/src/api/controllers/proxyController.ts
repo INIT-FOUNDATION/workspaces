@@ -108,7 +108,7 @@ export const proxyController = {
 
       proxy.web(req, res, {
         target:
-          environment == "DEV"
+          environment == "Development"
             ? "http://localhost:3000"
             : `http://${proxyDetails.sessionId}:3000`,
         ws: true
