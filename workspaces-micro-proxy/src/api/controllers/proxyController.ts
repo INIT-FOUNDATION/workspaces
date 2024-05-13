@@ -106,6 +106,7 @@ export const proxyController = {
       req.baseUrl = ""
       req.url = "/";
 
+      // Only one session is permitted on development environment
       proxy.web(req, res, {
         target:
           environment == "Development"

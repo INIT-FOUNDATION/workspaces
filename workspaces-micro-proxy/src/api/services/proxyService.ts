@@ -43,6 +43,7 @@ export const proxyService = {
         Image: `${image.imageRepo}:${image.imageTag}`,
       };
 
+      // Only one session is permitted on development environment
       if (environment === "Development" && createOptions.HostConfig)
         createOptions.HostConfig.PortBindings = {
           "3000/tcp": [{ HostPort: "3000" }],
