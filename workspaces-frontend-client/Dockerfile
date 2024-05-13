@@ -1,9 +1,10 @@
 FROM ghcr.io/techknowkraftai/node:12.22 AS build
+ARG ENVIRONMENT=dev
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build:dev
+RUN npm run build:$ENVIRONMENT
 
 # Stage 2: Create a lightweight image to serve the app
 FROM ghcr.io/techknowkraftai/nginx:1.17.1-alpine

@@ -6,7 +6,7 @@ import { ParticipantModel } from "../../models/participantsModel";
 import { SessionModel } from "../../models/sessionsModel";
 import Docker, { ContainerCreateOptions, Image } from "dockerode";
 
-const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "DEV");
+const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development");
 
 export const proxyService = {
   createProxy: async (proxyDetails: any) => {

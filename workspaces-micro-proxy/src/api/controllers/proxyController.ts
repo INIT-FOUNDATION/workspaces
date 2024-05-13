@@ -12,7 +12,7 @@ import {
   validateJoinProxy,
 } from "../../validations";
 import httpProxy from "http-proxy";
-const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "DEV");
+const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development");
 
 export const proxyController = {
   createProxy: async (req: Request, res: Response): Promise<Response> => {

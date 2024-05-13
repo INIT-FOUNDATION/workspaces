@@ -1,0 +1,175 @@
+name: Dev Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      workspaces-micro-auth:
+        type: boolean
+        required: false
+      workspaces-micro-sessions:
+        type: boolean
+        required: false
+      workspaces-micro-proxy:
+        type: boolean
+        required: false
+      workspaces-micro-websocket:
+        type: boolean
+        required: false
+      workspaces-frontend-client:
+        type: boolean
+        required: false
+
+jobs:
+  build-and-push:
+    name: Build and Push Services
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG_SUFFIX_ENV: dev
+      NODE_ENV: Development
+      FRONTEND_BUILD_ENV: dev
+      DEPLOYMENTS_PROJECT: TechknowkraftAI/init-deployments
+      DEPLOYMENTS_PROJECT_BRANCH: dev_release
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_AUTH_TOKEN }}
+
+      - name: Set Frontend and Backend Services
+        id: micro-services
+        run: |
+          frontend=""
+          backend=""
+
+          selectedServices=$(jq -r 'to_entries | map(select(.value == "true")) | map(.key) | join(",")' <<< '${{ toJson(github.event.inputs) }}')
+
+          echo "Selected Services to deploy $selectedServices"
+
+          IFS=',' read -ra services <<< "$selectedServices"
+
+          for service in ${services[@]}; do
+            if [[ "$service" == *"frontend"* ]]; then
+                frontend="$frontend$service,"
+            else
+                backend="$backend$service,"
+            fi
+          done
+
+          frontend="${frontend%,}"
+          backend="${backend%,}"
+
+          echo "Backend Services to be Deployed :: $backend"
+          echo "Frontend Services to be Deployed: $frontend"
+
+          echo "frontend=$frontend" >> $GITHUB_OUTPUT
+          echo "backend=$backend" >> $GITHUB_OUTPUT
+
+      - name: Build and Push Backend Services
+        env:
+          COMMON_SERVICE_NAME: workspaces-micro-commons
+        run: |
+          IFS=',' read -ra services <<< "${{ steps.micro-services.outputs.backend }}"
+
+          for service in "${services[@]}"; do
+
+            echo "Creating Build for $service"
+
+            cd $service
+            
+            port=$(jq -r '.nodemonConfig.env.PORT' package.json)
+            jq --arg port "$port" --arg service "$service" '
+              .nodemonConfig.env = {
+                "NODE_ENV": "$NODE_ENV",
+                "PORT": ($port | tonumber),
+                "MODULE": $service,
+                "HOST": "localhost"
+              }
+            ' package.json > package-temp.json && mv package-temp.json package.json
+
+            if grep -q "$COMMON_SERVICE_NAME" "package.json"; then
+              jq --arg common "$COMMON_SERVICE_NAME" '
+                .dependencies[$common] = "./\($common)"
+              ' package.json > package-temp.json && mv package-temp.json package.json
+              rm -rf $COMMON_SERVICE_NAME; cp -a ../$COMMON_SERVICE_NAME .
+            fi
+
+            docker_registry_name=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            short_sha=$(git rev-parse --short ${{ github.sha }})
+            branch_name=$(echo "${{ github.ref }}" | sed 's|refs/heads/||' | sed 's|[/_]|-|g')
+            image=ghcr.io/$docker_registry_name/$service:$short_sha-$branch_name-$IMAGE_TAG_SUFFIX_ENV
+
+            docker build -t $image . || exit 1
+            docker push $image || exit 1
+
+            echo "Build Succeeded for $service"
+
+            cd ..
+          done
+
+      - name: Build and Push Frontend Services
+        run: |
+          IFS=',' read -ra services <<< "${{ steps.micro-services.outputs.frontend  }}"
+
+          for service in "${services[@]}"; do
+
+            echo "Creating Build for $service"
+
+            cd $service
+
+            docker_registry_name=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            short_sha=$(git rev-parse --short ${{ github.sha }})
+            branch_name=$(echo "${{ github.ref }}" | sed 's|refs/heads/||' | sed 's|[/_]|-|g')
+            image=ghcr.io/$docker_registry_name/$service:$short_sha-$branch_name-$IMAGE_TAG_SUFFIX_ENV
+
+            docker build --build-arg ENVIRONMENT=$FRONTEND_BUILD_ENV -t $image . || exit 1
+            docker push $image || exit 1
+
+            echo "Build Succeeded for $service"
+
+            cd ..
+          done
+
+      - name: Checkout Code of Deployments
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.DEPLOYMENTS_PROJECT }}
+          ref: ${{ env.DEPLOYMENTS_PROJECT_BRANCH }}
+          token: ${{ secrets.DOCKER_REGISTRY_AUTH_TOKEN }}
+
+      - name: Updating Build in Deployments
+        env:
+          DOCKER_COMPOSE: docker-compose-workspaces.yaml
+        run: |
+          backendServices="${{ steps.micro-services.outputs.backend }}"
+          frontendServices="${{ steps.micro-services.outputs.frontend }}"
+          servicesToBeDeployed="$([ -n "$backendServices" ] && [ -n "$frontendServices" ] && echo "$backendServices," || echo "$backendServices")$frontendServices"
+
+          IFS=',' read -ra services <<< "$servicesToBeDeployed"
+
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+
+          for service in "${services[@]}"; do
+
+            docker_registry_name=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+            short_sha=$(git rev-parse --short ${{ github.sha }})
+            branch_name=$(echo "${{ github.ref }}" | sed 's|refs/heads/||' | sed 's|[/_]|-|g')
+            image=ghcr.io/$docker_registry_name/$service:$short_sha-$branch_name-$IMAGE_TAG_SUFFIX_ENV
+
+            echo "Updating Image ${image} for ${service}"
+
+            yq e ".services.${service}.image = \"${image}\"" -i "docker-compose/$DOCKER_COMPOSE"
+
+          done
+
+          git add "docker-compose/$DOCKER_COMPOSE"
+
+          git commit -m "Deploying Services ${servicesToBeDeployed}"
+                    
+          git push origin "$DEPLOYMENTS_PROJECT_BRANCH"
