@@ -1,18 +1,22 @@
-
 import { Response } from "express";
-import { ERROR_MESSAGES, HTTP_STATUS_CODES, loggerUtils } from "workspaces-micro-commons";;
+import {
+  ERROR_MESSAGES,
+  HTTP_STATUS_CODES,
+  loggerUtils,
+} from "workspaces-micro-commons";
 import { IMAGE_ERROR_RESPONSES } from "../../constants";
 import { ImageDetails, IImage } from "../../types/custom";
 import { Request } from "../../types/express";
 import { Image } from "../../models/imagesModel";
 import { imagesService } from "../services";
 import { validateImage, validateUpdateImage } from "../../validations";
- 
+
 export const imagesController = {
   createImage: async (req: Request, res: Response): Promise<Response> => {
     try {
       const imageDetails: ImageDetails = new Image(req.body);
-      
+      imageDetails.clientId = req.decodedToken.clientId;
+
       const { error } = validateImage(imageDetails);
 
       if (error) {
@@ -28,7 +32,10 @@ export const imagesController = {
           });
       }
 
-      const imageExists: boolean = await imagesService.imageExistsByName(imageDetails.imageName);
+      const imageExists: boolean = await imagesService.imageExistsByName(
+        imageDetails.imageName,
+        req.decodedToken.clientId
+      );
 
       if (imageExists) {
         return res
@@ -53,16 +60,18 @@ export const imagesController = {
     try {
       const imageId: string = req.params.imageId;
 
-      if (!imageId) return res
-      .status(HTTP_STATUS_CODES.BAD_REQUEST)
-      .send(IMAGE_ERROR_RESPONSES.IMAGEERR002);
-  
-      const images: IImage[] = await imagesService.getImageById(imageId)
+      if (!imageId)
+        return res
+          .status(HTTP_STATUS_CODES.BAD_REQUEST)
+          .send(IMAGE_ERROR_RESPONSES.IMAGEERR002);
 
-      if (images.length == 0) return res
-      .status(HTTP_STATUS_CODES.BAD_REQUEST)
-      .send(IMAGE_ERROR_RESPONSES.IMAGEERR003);
-  
+      const images: IImage[] = await imagesService.getImageById(imageId);
+
+      if (images.length == 0)
+        return res
+          .status(HTTP_STATUS_CODES.BAD_REQUEST)
+          .send(IMAGE_ERROR_RESPONSES.IMAGEERR003);
+
       return res.status(HTTP_STATUS_CODES.OK).send({
         data: { image: images[0] },
         message: `Image Fetched Successfully`,
@@ -74,25 +83,24 @@ export const imagesController = {
         .send(IMAGE_ERROR_RESPONSES.IMAGEERR000);
     }
   },
-  deleteImageById: async (
-    req: Request,
-    res: Response
-  ): Promise<Response> => {
+  deleteImageById: async (req: Request, res: Response): Promise<Response> => {
     try {
       const imageId: string = req.params.imageId;
 
-      if (!imageId) return res
-      .status(HTTP_STATUS_CODES.BAD_REQUEST)
-      .send(IMAGE_ERROR_RESPONSES.IMAGEERR002);
+      if (!imageId)
+        return res
+          .status(HTTP_STATUS_CODES.BAD_REQUEST)
+          .send(IMAGE_ERROR_RESPONSES.IMAGEERR002);
 
-      const imageExists: boolean = await imagesService.imageExistsById(imageId)
+      const imageExists: boolean = await imagesService.imageExistsById(imageId);
 
-      if (!imageExists) return res
-      .status(HTTP_STATUS_CODES.BAD_REQUEST)
-      .send(IMAGE_ERROR_RESPONSES.IMAGEERR003);
-  
+      if (!imageExists)
+        return res
+          .status(HTTP_STATUS_CODES.BAD_REQUEST)
+          .send(IMAGE_ERROR_RESPONSES.IMAGEERR003);
+
       await imagesService.deleteImageById(imageId);
-  
+
       return res.status(HTTP_STATUS_CODES.OK).send({
         data: { imageId },
         message: "Image Deleted Successfully",
@@ -105,16 +113,13 @@ export const imagesController = {
       });
     }
   },
-  updateImageById: async (
-    req: Request,
-    res: Response
-  ): Promise<Response> => {
+  updateImageById: async (req: Request, res: Response): Promise<Response> => {
     try {
       const imageDetails: ImageDetails = req.body;
       imageDetails.imageId = req.params.imageId;
 
       const { error } = validateUpdateImage(imageDetails);
-  
+
       if (error) {
         if (error.details)
           return res.status(HTTP_STATUS_CODES.BAD_REQUEST).send({
@@ -128,22 +133,28 @@ export const imagesController = {
           });
       }
 
-      const imageExistsById: boolean = await imagesService.imageExistsById(imageDetails.imageId)
+      const imageExistsById: boolean = await imagesService.imageExistsById(
+        imageDetails.imageId
+      );
 
-      if (!imageExistsById) return res
-      .status(HTTP_STATUS_CODES.BAD_REQUEST)
-      .send(IMAGE_ERROR_RESPONSES.IMAGEERR003);
+      if (!imageExistsById)
+        return res
+          .status(HTTP_STATUS_CODES.BAD_REQUEST)
+          .send(IMAGE_ERROR_RESPONSES.IMAGEERR003);
 
-      const imageExistsByName: boolean = await imagesService.imageExistsByName(imageDetails.imageName);
+      const imageExistsByName: boolean = await imagesService.imageExistsByName(
+        imageDetails.imageName,
+        req.decodedToken.clientId
+      );
 
       if (imageExistsByName) {
         return res
           .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send(IMAGE_ERROR_RESPONSES.IMAGEERR006);
       }
-  
+
       await imagesService.updateImageById(imageDetails);
-  
+
       return res.status(HTTP_STATUS_CODES.OK).send({
         data: { imageId: imageDetails.imageId },
         message: "Image Updated Successfully",
@@ -156,20 +167,17 @@ export const imagesController = {
       });
     }
   },
-  listImages: async (
-    req: Request,
-    res: Response
-  ): Promise<Response> => {
+  listImages: async (req: Request, res: Response): Promise<Response> => {
     try {
-      const images: IImage[] = await imagesService.listImages()
+      const clientId = req.decodedToken.clientId;
+      const images: IImage[] = await imagesService.listImages(clientId);
 
-      if (images.length == 0) return res
-      .status(HTTP_STATUS_CODES.OK)
-      .send({
-        data: { images },
-        message: "No Images found!",
-      });
-    
+      if (images.length == 0)
+        return res.status(HTTP_STATUS_CODES.OK).send({
+          data: { images },
+          message: "No Images found!",
+        });
+
       return res.status(HTTP_STATUS_CODES.OK).send({
         data: { images },
         message: "Images Fetched Successfully",
@@ -182,4 +190,4 @@ export const imagesController = {
       });
     }
   },
-}
+};

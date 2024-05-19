@@ -1,17 +1,25 @@
-
 import express from "express";
 import { imagesController } from "../controllers/imagesController";
+import { clientMiddleware } from "../middleware/clientMiddleware";
 
 const imagesRouter = express.Router();
 
-imagesRouter.post("/create", imagesController.createImage);
+imagesRouter.post("/create", clientMiddleware, imagesController.createImage);
 
-imagesRouter.get("/list", imagesController.listImages);
+imagesRouter.get("/list", clientMiddleware, imagesController.listImages);
 
-imagesRouter.get("/:imageId", imagesController.getImageById);
+imagesRouter.get("/:imageId", clientMiddleware, imagesController.getImageById);
 
-imagesRouter.put("/:imageId", imagesController.updateImageById);
+imagesRouter.put(
+  "/:imageId",
+  clientMiddleware,
+  imagesController.updateImageById
+);
 
-imagesRouter.delete("/:imageId", imagesController.deleteImageById);
+imagesRouter.delete(
+  "/:imageId",
+  clientMiddleware,
+  imagesController.deleteImageById
+);
 
 export { imagesRouter };

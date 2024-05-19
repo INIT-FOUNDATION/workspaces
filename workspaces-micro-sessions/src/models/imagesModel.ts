@@ -13,6 +13,7 @@ class Image {
   registryUsername: string;
   registryPassword: string;
   isActive: boolean;
+  clientId: string;
 
   constructor(image: IImage) {
     this.imageId = image.imageId || randomUUID();
@@ -23,13 +24,14 @@ class Image {
     this.registryUsername = image.registryUsername;
     this.registryPassword = image.registryPassword;
     this.isActive = IMAGES_STATUS.ACTIVE;
+    this.clientId = image.clientId;
   }
 }
 
-const ImageModel: Model<IImage> =
-  mongoUtils.createModel(
-    MONGO_COLLECTIONS.IMAGES,
-    new Schema<IImage>({
+const ImageModel: Model<IImage> = mongoUtils.createModel(
+  MONGO_COLLECTIONS.IMAGES,
+  new Schema<IImage>(
+    {
       imageId: { type: String, required: true },
       imageName: { type: String, required: true },
       imageRepo: { type: String, required: true },
@@ -38,9 +40,12 @@ const ImageModel: Model<IImage> =
       registryUsername: { type: String },
       registryPassword: { type: String },
       isActive: { type: Boolean, required: true },
-    }, {
+      clientId: { type: String, required: true },
+    },
+    {
       timestamps: true,
-    })
-  );
+    }
+  )
+);
 
 export { Image, ImageModel };

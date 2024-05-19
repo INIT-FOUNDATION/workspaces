@@ -12,6 +12,7 @@ export const validateImage = (imageDetails: ImageDetails) => {
     registryUsername: Joi.string().allow("", null),
     registryPassword: Joi.string().allow("", null),
     isActive: Joi.boolean().default(IMAGES_STATUS.ACTIVE).required(),
+    clientId: Joi.string().required(),
   });
   return imageDetailsSchema.validate(imageDetails);
 };
@@ -26,6 +27,7 @@ export const validateUpdateImage = (imageDetails: ImageDetails) => {
     registryUsername: Joi.string().allow("", null),
     registryPassword: Joi.string().allow("", null),
     isActive: Joi.boolean().default(IMAGES_STATUS.ACTIVE),
+    clientId: Joi.string().required(),
   });
   return imageDetailsSchema.validate(imageDetails);
 };

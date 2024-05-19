@@ -49,7 +49,8 @@ export const sessionService = {
           }
 
           const availableImages = await imagesService.getImageByName(
-            sessionDetails.imageName
+            sessionDetails.imageName,
+            sessionDetails.clientId
           );
 
           if (availableImages.length == 0) {

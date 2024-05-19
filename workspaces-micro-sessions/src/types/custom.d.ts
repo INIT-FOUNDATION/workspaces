@@ -77,6 +77,7 @@ export interface IImage extends Document {
   registryUsername: string;
   registryPassword: string;
   isActive: boolean;
+  clientId: string;
 }
 
 export interface ImageDetails {
@@ -88,4 +89,5 @@ export interface ImageDetails {
   registryUsername: string;
   registryPassword: string;
   isActive: boolean;
+  clientId: string;
 }
