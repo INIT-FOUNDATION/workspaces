@@ -15,6 +15,10 @@ const MODULE = envUtils.getStringEnvVariableOrDefault(
   "MODULE",
   "workspaces-micro-proxy"
 );
+const pullImages = envUtils.getBooleanEnvVariableOrDefault(
+  "WORKSPACES_PULL_IMAGES",
+  false
+);
 
 app.use(express.json());
 app.use(helmet());
@@ -27,5 +31,5 @@ app.listen(PORT, async () => {
   await mongoUtils.connect();
   await redisUtils.primaryRedisClient.connect();
   await redisUtils.readRedisReplicaClient.connect();
-  await proxyService.pullAvailableImages();
+  if (pullImages) await proxyService.pullAvailableImages();
 });

@@ -1,7 +1,9 @@
 import express, { Request, Response, Express, NextFunction } from "express";
 import bodyParser from "body-parser";
 import { proxyRouter } from "../api/routes/proxyRouter";
-import { expressConstants } from "workspaces-micro-commons";
+import { envUtils, expressConstants } from "workspaces-micro-commons";
+import { createProxyMiddleware } from "http-proxy-middleware";
+import { proxyMiddleware } from "../api/middleware/proxyMiddleware";
 
 export default function (app: Express): void {
   app.use(express.json());
@@ -9,7 +11,9 @@ export default function (app: Express): void {
   app.use(function (req: Request, res: Response, next: NextFunction): void {
     if (req.body) {
       const riskyChars =
-        (expressConstants.RISKY_CHARACTERS && expressConstants.RISKY_CHARACTERS.split(",")) || [];
+        (expressConstants.RISKY_CHARACTERS &&
+          expressConstants.RISKY_CHARACTERS.split(",")) ||
+        [];
       for (const key in req.body) {
         if (req.body && req.body[key] && typeof req.body[key] === "string") {
           if (riskyChars.indexOf(req.body[key].charAt(0)) >= 0) {
@@ -21,14 +25,42 @@ export default function (app: Express): void {
     }
 
     res.header("Access-Control-Allow-Origin", expressConstants.ALLOWED_ORIGINS);
-    res.header("Access-Control-Allow-Methods", expressConstants.ALLOWED_METHODS);
+    res.header(
+      "Access-Control-Allow-Methods",
+      expressConstants.ALLOWED_METHODS
+    );
     res.header("Server", "");
-    res.header("Access-Control-Allow-Headers", expressConstants.ALLOWED_HEADERS);
+    res.header(
+      "Access-Control-Allow-Headers",
+      expressConstants.ALLOWED_HEADERS
+    );
     next();
   });
 
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
+
+  function router(req: Request) {
+    const environment = envUtils.getStringEnvVariableOrDefault(
+      "NODE_ENV",
+      "Development"
+    );
+    const { sessionId } = req.params;
+    const proxyHost = environment === "Development" ? "localhost" : sessionId;
+    return `http://${proxyHost}:3000`;
+  }
+
+  const proxyOptions = {
+    changeOrigin: true,
+    ws: true,
+    router,
+  };
+
+  app.use(
+    "/api/v1/proxy/:sessionId/:participantId",
+    proxyMiddleware,
+    createProxyMiddleware(proxyOptions)
+  );
 
   app.use("/api/v1/proxy", proxyRouter);
 }
