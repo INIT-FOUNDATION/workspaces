@@ -40,7 +40,7 @@ export default function (app: Express): void {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
 
-  function router(req: Request) {
+  const router = (req: Request) => {
     const environment = envUtils.getStringEnvVariableOrDefault(
       "NODE_ENV",
       "Development"
@@ -48,7 +48,7 @@ export default function (app: Express): void {
     const { sessionId } = req.params;
     const proxyHost = environment === "Development" ? "localhost" : sessionId;
     return `http://${proxyHost}:3000`;
-  }
+  };
 
   const proxyOptions = {
     changeOrigin: true,
