@@ -330,6 +330,14 @@ export const proxyService = {
         loggerUtils.info(
           `proxyService :: pullAvailableImages :: pulling image :: ${imageName}`
         );
+
+        if (image.registryHost && image.registryUsername && image.registryPassword) {
+          await docker.checkAuth({
+            username: image.registryUsername,
+            password: image.registryPassword,
+            serveraddress: `https://${image.registryHost}`
+          })
+        }
         await docker.pull(imageName);
       }
 
