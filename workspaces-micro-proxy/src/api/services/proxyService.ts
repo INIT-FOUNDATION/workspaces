@@ -4,7 +4,7 @@ import { IMAGES_STATUS, SESSIONS_STATUS } from "../../constants";
 import { ImageModel } from "../../models/imagesModel";
 import { ParticipantModel } from "../../models/participantsModel";
 import { SessionModel } from "../../models/sessionsModel";
-import Docker, { ContainerCreateOptions, Image } from "dockerode";
+import Docker, { Container, ContainerCreateOptions } from "dockerode";
 
 const environment = envUtils.getStringEnvVariableOrDefault(
   "NODE_ENV",
@@ -20,64 +20,70 @@ export const proxyService = {
         proxyDetails.imageId
       );
       const image: IImage = images[0];
+      const containerSessionExists = await proxyService.dockerContainerExistsById(proxyDetails.sessionId);
 
-      const createOptions: ContainerCreateOptions = {
-        name: proxyDetails.sessionId,
-        HostConfig: {
-          PortBindings: {},
-          SecurityOpt: ["seccomp=unconfined"],
-          ShmSize: proxyDetails.sharedMemory,
-          RestartPolicy: { Name: "always" },
-          Devices: [
-            {
-              PathOnHost: soundDevice,
-              PathInContainer: soundDevice,
-              CgroupPermissions: "rwm",
-            },
+      if (!containerSessionExists) {
+        const createOptions: ContainerCreateOptions = {
+          name: proxyDetails.sessionId,
+          HostConfig: {
+            PortBindings: {},
+            SecurityOpt: ["seccomp=unconfined"],
+            ShmSize: proxyDetails.sharedMemory,
+            RestartPolicy: { Name: "always" },
+            Devices: [
+              {
+                PathOnHost: soundDevice,
+                PathInContainer: soundDevice,
+                CgroupPermissions: "rwm",
+              },
+            ],
+            Mounts: [],
+          },
+          Env: [
+            "PUID=1000",
+            "PGID=1000",
+            `TZ=${proxyDetails.timezone}`,
+            `FIREFOX_CLI=${proxyDetails.startUrl}`,
           ],
-          Mounts: [],
-        },
-        Env: [
-          "PUID=1000",
-          "PGID=1000",
-          `TZ=${proxyDetails.timezone}`,
-          `FIREFOX_CLI=${proxyDetails.startUrl}`,
-        ],
-        Image: `${image.imageRepo}:${image.imageTag}`,
-      };
-
-      // Only one session is permitted on development environment
-      if (environment === "Development" && createOptions.HostConfig)
-        createOptions.HostConfig.PortBindings = {
-          "3000/tcp": [{ HostPort: "3000" }],
-          "3001/tcp": [{ HostPort: "3001" }],
+          Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
-      if (proxyDetails.saveSession)
-        createOptions.HostConfig?.Mounts?.push({
-          Type: "volume",
-          Source: proxyDetails.sessionId,
-          Target: "/config",
-        });
+        // Only one session is permitted on development environment
+        if (environment === "Development" && createOptions.HostConfig)
+          createOptions.HostConfig.PortBindings = {
+            "3000/tcp": [{ HostPort: "3000" }],
+            "3001/tcp": [{ HostPort: "3001" }],
+          };
 
-      const container = await docker.createContainer(createOptions);
-      await container.start();
+        if (proxyDetails.saveSession)
+          createOptions.HostConfig?.Mounts?.push({
+            Type: "volume",
+            Source: proxyDetails.sessionId,
+            Target: "/config",
+          });
 
-      const sessionObj: Partial<ISession> = {
-        sessionId: proxyDetails.sessionId,
-        clientId: proxyDetails.clientId,
-        agentId: proxyDetails.agentId,
-        timezone: proxyDetails.timezone,
-        startUrl: proxyDetails.startUrl,
-        participantsAccess: proxyDetails.participantsAccess,
-        drawCursors: proxyDetails.drawCursors,
-        sharedMemory: proxyDetails.sharedMemory,
-        saveSession: proxyDetails.saveSession,
-        imageId: proxyDetails.imageId,
-        status: proxyDetails.status,
-      };
+        const container = await docker.createContainer(createOptions);
+        await container.start();
 
-      await mongoUtils.insertDocument<ISession>(SessionModel, sessionObj);
+        const sessionExists: boolean = await proxyService.sessionExistsById(proxyDetails.sessionId);
+
+        if (!sessionExists) {
+          const sessionObj: Partial<ISession> = {
+            sessionId: proxyDetails.sessionId,
+            clientId: proxyDetails.clientId,
+            agentId: proxyDetails.agentId,
+            timezone: proxyDetails.timezone,
+            startUrl: proxyDetails.startUrl,
+            participantsAccess: proxyDetails.participantsAccess,
+            drawCursors: proxyDetails.drawCursors,
+            sharedMemory: proxyDetails.sharedMemory,
+            saveSession: proxyDetails.saveSession,
+            imageId: proxyDetails.imageId,
+            status: proxyDetails.status,
+          };
+          await mongoUtils.insertDocument<ISession>(SessionModel, sessionObj);
+        }
+      }
     } catch (error) {
       loggerUtils.error(
         `proxyService :: createProxy :: proxyDetails ${JSON.stringify(
@@ -333,4 +339,14 @@ export const proxyService = {
       throw error;
     }
   },
+  dockerContainerExistsById: async (containerId: string): Promise<boolean> => {
+    try {
+      const docker: Docker = await proxyService.getDockerClient();
+      const container: Container = await docker.getContainer(containerId);
+      return container ? true : false
+    } catch (error) {
+      loggerUtils.error(`proxyService :: getDockerClient :: ${error}`);
+      throw error;
+    }
+  }
 };

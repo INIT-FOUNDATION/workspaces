@@ -29,7 +29,7 @@ export const sessionService = {
   ) => {
     try {
       const clientBaseUrl = getStringEnvVariableOrDefault(
-        "WORKSPACESCLIENT_BASE_URL",
+        "WORKSPACES_CLIENT_BASE_URL",
         "http://localhost:3000"
       );
 
@@ -123,6 +123,14 @@ export const sessionService = {
       }
 
       const agent: IAgent = agents[0];
+      
+      sessionDetails.agentId = agent.agentId;
+
+      const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${
+        agent.agentHost
+      }:${agent.agentPort}/api/v1/proxy/create`;
+
+      await proxyService.createProxy(sessionDetails, baseUrl);
 
       const participantObj: Partial<IParticipant> = {
         participantId: randomUUID(),
