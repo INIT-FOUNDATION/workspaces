@@ -21,7 +21,15 @@ const pullImages = envUtils.getBooleanEnvVariableOrDefault(
 );
 
 app.use(express.json());
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      frameAncestors: envUtils.getStringEnvVariableOrDefault("WORKSPACE_PROXY_FRAME_ANCESTORS", "self,*").split(","),
+    },
+  },
+  frameguard: false,
+}));
 
 routes(app);
 

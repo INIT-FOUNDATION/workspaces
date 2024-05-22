@@ -21,7 +21,6 @@ export const proxyService = {
       );
       const image: IImage = images[0];
       const containerSessionExists = await proxyService.dockerContainerExistsById(proxyDetails.sessionId);
-
       if (!containerSessionExists) {
         const createOptions: ContainerCreateOptions = {
           name: proxyDetails.sessionId,
@@ -350,11 +349,16 @@ export const proxyService = {
   dockerContainerExistsById: async (containerId: string): Promise<boolean> => {
     try {
       const docker: Docker = await proxyService.getDockerClient();
-      const container: Container = await docker.getContainer(containerId);
-      return container ? true : false
-    } catch (error) {
-      loggerUtils.error(`proxyService :: getDockerClient :: ${error}`);
-      throw error;
+      const container: Container = docker.getContainer(containerId);
+      await container.inspect();
+      return true;
+    } catch (error: any) {
+      if (error.statusCode === 404) {
+        return false;
+      } else {
+        loggerUtils.error(`proxyService :: getDockerClient :: ${error}`);
+        throw error;
+      }
     }
   }
 };
