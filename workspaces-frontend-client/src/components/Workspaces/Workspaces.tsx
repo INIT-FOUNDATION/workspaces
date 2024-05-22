@@ -89,6 +89,7 @@ const Workspaces: React.FC = () => {
             agentHost={agentHost}
             agentPort={agentPort}
             agentSSLEnabled={agentSSLEnabled}
+            access={access}
           />
           {drawCursors && (
             <Cursors

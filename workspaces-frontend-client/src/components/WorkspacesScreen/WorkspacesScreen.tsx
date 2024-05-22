@@ -1,3 +1,4 @@
+import { access } from "fs";
 import React, { CSSProperties, useEffect } from "react";
 
 interface WorkspacesScreenProps {
@@ -6,6 +7,7 @@ interface WorkspacesScreenProps {
   agentHost: string;
   agentPort: string;
   agentSSLEnabled: boolean;
+  access: string;
 }
 
 const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
@@ -14,6 +16,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   agentHost,
   agentPort,
   agentSSLEnabled,
+  access
 }) => {
   useEffect(() => {
     const scheme = agentSSLEnabled ? "https" : "http";
@@ -28,13 +31,14 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     iframe.style.right = "0";
     iframe.style.bottom = "0";
     iframe.style.overflow = "hidden";
+    iframe.style.pointerEvents = access === "read" ? "none" : "auto";
 
     document.body.appendChild(iframe);
 
     return () => {
       document.body.removeChild(iframe);
     };
-  }, []);
+  }, [access]);
 
   return null;
 };
