@@ -1,7 +1,11 @@
 import express, { Request, Response, Express, NextFunction } from "express";
 import bodyParser from "body-parser";
 import { proxyRouter } from "../api/routes/proxyRouter";
-import { envUtils, expressConstants } from "workspaces-micro-commons";
+import {
+  envUtils,
+  expressConstants,
+  loggerUtils,
+} from "workspaces-micro-commons";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { proxyMiddleware } from "../api/middleware/proxyMiddleware";
 
@@ -41,13 +45,18 @@ export default function (app: Express): void {
   app.use(bodyParser.urlencoded({ extended: false }));
 
   const router = (req: Request) => {
-    const environment = envUtils.getStringEnvVariableOrDefault(
-      "NODE_ENV",
-      "Development"
-    );
-    const { sessionId } = req.params;
-    const proxyHost = environment === "Development" ? "localhost" : sessionId;
-    return `http://${proxyHost}:3000`;
+    try {
+      const environment = envUtils.getStringEnvVariableOrDefault(
+        "NODE_ENV",
+        "Development"
+      );
+      const { sessionId } = req.params;
+      const proxyHost = environment === "Development" ? "localhost" : sessionId;
+      return `http://${proxyHost}:3000`;
+    } catch (error) {
+      loggerUtils.error(`routes :: router :: ${error}`);
+      throw error;
+    }
   };
 
   const proxyOptions = {
@@ -59,7 +68,7 @@ export default function (app: Express): void {
   app.use(
     "/api/v1/proxy/:sessionId/:participantId",
     proxyMiddleware,
-    createProxyMiddleware(proxyOptions)
+    createProxyMiddleware<Request, Response>(proxyOptions)
   );
 
   app.use("/api/v1/proxy", proxyRouter);
