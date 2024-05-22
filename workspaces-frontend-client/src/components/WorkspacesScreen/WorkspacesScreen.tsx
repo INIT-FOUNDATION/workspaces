@@ -31,11 +31,21 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     iframe.style.bottom = "0";
     iframe.style.overflow = "hidden";
     iframe.style.pointerEvents = access === "read" ? "none" : "auto";
+    iframe.style.border = "none"; 
+    
+    const container = document.createElement("div");
+    container.style.position = "fixed";
+    container.style.top = "0";
+    container.style.left = "0";
+    container.style.width = "100%";
+    container.style.height = "100%";
+    container.style.overflow = "hidden";
 
-    document.body.appendChild(iframe);
+    container.appendChild(iframe);
+    document.body.appendChild(container);
 
     return () => {
-      document.body.removeChild(iframe);
+      document.body.removeChild(container);
     };
   }, [access]);
 
