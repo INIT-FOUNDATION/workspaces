@@ -1,5 +1,4 @@
-import { access } from "fs";
-import React, { CSSProperties, useEffect } from "react";
+import React, { useEffect } from "react";
 
 interface WorkspacesScreenProps {
   sessionId: string;
