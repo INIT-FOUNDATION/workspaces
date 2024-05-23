@@ -260,7 +260,7 @@ export const sessionService = {
       const agent: IAgent = agents[0];
       const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${
         agent.agentHost
-      }:${agent.agentPort}`;
+      }:${agent.agentPort}/api/v1/proxy`;
 
       await proxyService.destroyProxy(sessionId, deletePersistence, baseUrl);
     } catch (error) {

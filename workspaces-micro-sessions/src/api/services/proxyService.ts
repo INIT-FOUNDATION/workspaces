@@ -28,9 +28,10 @@ export const proxyService = {
     baseUrl: string
   ) => {
     try {
-      await axiosInstance.post(baseUrl, {
-        sessionId,
-        deletePersistence,
+      await axiosInstance.delete(baseUrl + `/${sessionId}`, {
+        data: {
+          deletePersistence
+        },
       });
     } catch (error) {
       loggerUtils.error(

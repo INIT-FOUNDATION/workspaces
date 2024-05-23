@@ -20,7 +20,8 @@ export const proxyService = {
         proxyDetails.imageId
       );
       const image: IImage = images[0];
-      const containerSessionExists = await proxyService.dockerContainerExistsById(proxyDetails.sessionId);
+      
+      const containerSessionExists = await proxyService.dockerContainerExistsByName(proxyDetails.sessionId);
       if (!containerSessionExists) {
         const networkName = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_CONTAINERS_NETWORK", "workspaces-proxy-network");
         await proxyService.ensureNetworkExists(networkName);
@@ -255,8 +256,8 @@ export const proxyService = {
       );
 
       if (container) {
-        container.stop();
-        container.remove();
+        await container.stop();
+        await container.remove();
       }
 
       await mongoUtils.updateDocuments<ISession>(
@@ -265,7 +266,7 @@ export const proxyService = {
           sessionId: proxyDetails.sessionId,
         },
         {
-          status: SESSIONS_STATUS.INACTIVE,
+          status: proxyDetails.deletePersistence ? SESSIONS_STATUS.DELETED : SESSIONS_STATUS.INACTIVE,
         }
       );
 
@@ -288,7 +289,7 @@ export const proxyService = {
       const containers = await docker.listContainers();
       for (const container of containers) {
         const containerNames = await container.Names;
-        if (containerNames.includes(containerName)) {
+        if (containerNames.includes(`/${containerName}`)) {
           return docker.getContainer(container.Id);
         }
       }
@@ -350,12 +351,17 @@ export const proxyService = {
       throw error;
     }
   },
-  dockerContainerExistsById: async (containerId: string): Promise<boolean> => {
+  dockerContainerExistsByName: async (containerName: string): Promise<boolean> => {
     try {
-      const docker: Docker = await proxyService.getDockerClient();
-      const container: Container = docker.getContainer(containerId);
-      await container.inspect();
-      return true;
+      const docker = await proxyService.getDockerClient();
+      const containers = await docker.listContainers();
+      for (const container of containers) {
+        const containerNames = await container.Names;
+        if (containerNames.includes(`/${containerName}`)) {
+          return true;
+        }
+      }
+      return false;
     } catch (error: any) {
       if (error.statusCode === 404) {
         return false;
