@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, forwardRef, Ref } from "react";
 
 interface WorkspacesScreenProps {
   sessionId: string;
@@ -9,14 +9,14 @@ interface WorkspacesScreenProps {
   access: string;
 }
 
-const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
+const WorkspacesScreen = forwardRef<HTMLDivElement, WorkspacesScreenProps>(({
   sessionId,
   participantId,
   agentHost,
   agentPort,
   agentSSLEnabled,
   access
-}) => {
+}, ref) => {
   useEffect(() => {
     const scheme = agentSSLEnabled ? "https" : "http";
     const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/`;
@@ -31,25 +31,27 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     iframe.style.bottom = "0";
     iframe.style.overflow = "hidden";
     iframe.style.pointerEvents = access === "read" ? "none" : "auto";
-    iframe.style.border = "none"; 
-    
-    const container = document.createElement("div");
-    container.style.position = "fixed";
-    container.style.top = "0";
-    container.style.left = "0";
-    container.style.width = "100%";
-    container.style.height = "100%";
-    container.style.overflow = "hidden";
+    iframe.style.border = "none";
 
-    container.appendChild(iframe);
-    document.body.appendChild(container);
+    const container = ref as React.MutableRefObject<HTMLDivElement>;
+    if (container.current) {
+      container.current.style.position = "fixed";
+      container.current.style.top = "0";
+      container.current.style.left = "0";
+      container.current.style.width = "100%";
+      container.current.style.height = "100%";
+      container.current.style.overflow = "hidden";
+      container.current.appendChild(iframe);
+    }
 
     return () => {
-      document.body.removeChild(container);
+      if (container.current) {
+        container.current.removeChild(iframe);
+      }
     };
   }, [access]);
 
-  return null;
-};
+  return null
+});
 
 export default WorkspacesScreen;

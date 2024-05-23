@@ -24,6 +24,7 @@ const Workspaces: React.FC = () => {
   const [drawCursors, setDrawCursors] = useState<boolean>(false);
   const [sessionStatus, setSessionStatus] = useState<number>(0);
   const [access, setAccess] = useState<string>("");
+  const workspacesContainerRef = useRef<HTMLDivElement>(null);
 
   const randomColor = () => {
     const letters = "0123456789ABCDEF";
@@ -84,6 +85,7 @@ const Workspaces: React.FC = () => {
       {sessionStatus && access && (
         <>
           <WorkspacesScreen
+            ref={workspacesContainerRef}
             sessionId={sessionId}
             participantId={participantId}
             agentHost={agentHost}
@@ -97,6 +99,7 @@ const Workspaces: React.FC = () => {
               sessionId={sessionId}
               participantName={participantName}
               cursorColor={cursorColor}
+              containerRef={workspacesContainerRef}
             />
           )}
         </>
