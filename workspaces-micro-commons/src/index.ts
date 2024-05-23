@@ -6,6 +6,7 @@ import {
   kafkaUtils,
   mongoUtils,
   postgresUtils,
+  nodeCacheUtils
 } from "./utils/database";
 import { loggerUtils } from "./utils/monitoring";
 import {
@@ -33,5 +34,6 @@ export {
   HTTP_STATUS_CODES,
   ERROR_MESSAGES,
   encryptionUtils,
-  MONGO_COLLECTIONS
+  MONGO_COLLECTIONS,
+  nodeCacheUtils
 };

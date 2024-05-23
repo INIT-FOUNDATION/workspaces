@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import socketIOClient, { Socket } from "socket.io-client";
 import { workspacesWebsocketBaseUrl } from "../../utils/config";
 import Cursors from "../Cursors/Cursors";
