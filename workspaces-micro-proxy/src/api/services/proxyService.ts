@@ -22,6 +22,9 @@ export const proxyService = {
       const image: IImage = images[0];
       const containerSessionExists = await proxyService.dockerContainerExistsById(proxyDetails.sessionId);
       if (!containerSessionExists) {
+        const networkName = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_CONTAINERS_NETWORK", "workspaces-proxy-network");
+        await proxyService.ensureNetworkExists(networkName);
+
         const createOptions: ContainerCreateOptions = {
           name: proxyDetails.sessionId,
           HostConfig: {
@@ -29,6 +32,7 @@ export const proxyService = {
             SecurityOpt: ["seccomp=unconfined"],
             ShmSize: proxyDetails.sharedMemory,
             RestartPolicy: { Name: "always" },
+            NetworkMode: networkName,
             Devices: [
               {
                 PathOnHost: soundDevice,
@@ -359,6 +363,29 @@ export const proxyService = {
         loggerUtils.error(`proxyService :: getDockerClient :: ${error}`);
         throw error;
       }
+    }
+  },
+  ensureNetworkExists: async (networkName: string): Promise<boolean> => {
+    try {
+      const docker: Docker = await proxyService.getDockerClient();
+      const networks = await docker.listNetworks();
+      const networkExists = networks.some(network => network.Name === networkName);
+  
+      if (networkExists) {
+        loggerUtils.info(`Network with name ${networkName} already exists.`);
+        return true;
+      } else {
+        await docker.createNetwork({
+          Name: networkName,
+          CheckDuplicate: true,
+          Driver: 'bridge', 
+        });
+        loggerUtils.info(`Network with name ${networkName} created successfully.`);
+        return true;
+      }
+    } catch (error: any) {
+      loggerUtils.error(`Error ensuring network exists with name ${networkName}: ${error.message}`);
+      throw error;
     }
   }
 };
