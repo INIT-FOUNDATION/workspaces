@@ -5,6 +5,7 @@ import {
   envUtils,
   expressConstants,
   loggerUtils,
+  nodeCacheUtils,
 } from "workspaces-micro-commons";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { proxyMiddleware } from "../api/middleware/proxyMiddleware";
@@ -44,15 +45,25 @@ export default function (app: Express): void {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
 
-  const router = (req: Request) => {
+  const router = async (req: Request) => {
     try {
       const environment = envUtils.getStringEnvVariableOrDefault(
         "NODE_ENV",
         "Development"
       );
-      const { sessionId } = req.params;
-      const proxyHost = environment === "Development" ? "localhost" : sessionId;
-      return `http://${proxyHost}:3000`;
+
+      if (environment == "Development") {
+        return "http://localhost:3000"
+      }
+
+      if (req && req.params) {
+        const { sessionId } = req.params;
+        nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId }, 300);
+        return `http://${sessionId}:3000`
+      } else {
+        const { sessionId } = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
+        return `http://${sessionId}:3000`
+      }
     } catch (error) {
       loggerUtils.error(`routes :: router :: ${error}`);
       throw error;
