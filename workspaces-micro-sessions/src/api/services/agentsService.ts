@@ -112,8 +112,8 @@ export const agentsService = {
           agentName: agentDetails.agentName || undefined,
           agentHost: agentDetails.agentHost || undefined,
           agentPort: agentDetails.agentPort || undefined,
-          sslEnabled: agentDetails.sslEnabled || true,
-          isActive: agentDetails.isActive || AGENTS_STATUS.ACTIVE,
+          sslEnabled: agentDetails.sslEnabled != undefined ? agentDetails.sslEnabled : true,
+          isActive: agentDetails.isActive != undefined ? agentDetails.isActive : AGENTS_STATUS.ACTIVE,
         }
       );
     } catch (error) {

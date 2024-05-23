@@ -94,6 +94,7 @@ export const imagesService = {
             createdAt: 0,
             updatedAt: 0,
             isActive: 0,
+            clientId: 0
           },
           {}
         );
@@ -117,7 +118,7 @@ export const imagesService = {
           registryHost: imageDetails.registryHost,
           registryUsername: imageDetails.registryUsername,
           registryPassword: imageDetails.registryPassword,
-          isActive: imageDetails.isActive || IMAGES_STATUS.ACTIVE,
+          isActive: imageDetails.isActive != undefined ? imageDetails.isActive : IMAGES_STATUS.ACTIVE,
         }
       );
     } catch (error) {
