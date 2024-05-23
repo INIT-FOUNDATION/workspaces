@@ -1,4 +1,4 @@
-import React, { useEffect, forwardRef, Ref } from "react";
+import React, { useEffect } from "react";
 
 interface WorkspacesScreenProps {
   sessionId: string;
@@ -9,14 +9,14 @@ interface WorkspacesScreenProps {
   access: string;
 }
 
-const WorkspacesScreen = forwardRef<HTMLDivElement, WorkspacesScreenProps>(({
+const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   sessionId,
   participantId,
   agentHost,
   agentPort,
   agentSSLEnabled,
   access
-}, ref) => {
+}) => {
   useEffect(() => {
     const scheme = agentSSLEnabled ? "https" : "http";
     const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/`;
@@ -31,27 +31,25 @@ const WorkspacesScreen = forwardRef<HTMLDivElement, WorkspacesScreenProps>(({
     iframe.style.bottom = "0";
     iframe.style.overflow = "hidden";
     iframe.style.pointerEvents = access === "read" ? "none" : "auto";
-    iframe.style.border = "none";
+    iframe.style.border = "none"; 
+    
+    const container = document.createElement("div");
+    container.style.position = "fixed";
+    container.style.top = "0";
+    container.style.left = "0";
+    container.style.width = "100%";
+    container.style.height = "100%";
+    container.style.overflow = "hidden";
 
-    const container = ref as React.MutableRefObject<HTMLDivElement>;
-    if (container.current) {
-      container.current.style.position = "fixed";
-      container.current.style.top = "0";
-      container.current.style.left = "0";
-      container.current.style.width = "100%";
-      container.current.style.height = "100%";
-      container.current.style.overflow = "hidden";
-      container.current.appendChild(iframe);
-    }
+    container.appendChild(iframe);
+    document.body.appendChild(container);
 
     return () => {
-      if (container.current) {
-        container.current.removeChild(iframe);
-      }
+      document.body.removeChild(container);
     };
   }, [access]);
 
-  return null
-});
+  return null;
+};
 
 export default WorkspacesScreen;

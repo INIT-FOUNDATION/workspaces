@@ -21,7 +21,6 @@ const Cursor: React.FC<CursorProps> = ({ x, y, label, color }) => {
     top: y,
     color: color,
     cursor: "pointer",
-    transition: "left 0.1s, top 0.1s",
   };
 
   return <div style={cursorStyle}>{label && truncateName(label)}</div>;
