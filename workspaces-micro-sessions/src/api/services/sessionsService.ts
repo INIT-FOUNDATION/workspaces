@@ -41,6 +41,7 @@ export const sessionService = {
         if (agents.length > 0) {
           const availableAgents: IAgent[] =
             await agentsService.getLeastActiveAgent(sessionDetails.clientId);
+
           if (availableAgents.length == 0) {
             loggerUtils.error(
               `sessionService :: createSession :: no agents are available`
@@ -123,9 +124,14 @@ export const sessionService = {
       }
 
       const agent: IAgent = agents[0];
-      
       sessionDetails.agentId = agent.agentId;
 
+
+      const existingSessionsData: ISession[] = await sessionService.getSessionById(sessionDetails.sessionId);
+      const existingSessionData: ISession  = existingSessionsData[0];
+
+      sessionDetails.imageId = existingSessionData.imageId;
+      
       const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${
         agent.agentHost
       }:${agent.agentPort}/api/v1/proxy/create`;
