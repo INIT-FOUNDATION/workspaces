@@ -30,27 +30,17 @@ install_docker_if_needed() {
         $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
         sudo apt-get update
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
     else
         echo "Docker is already installed."
-    fi
-}
-
-# Function to check if Docker Compose is installed and install it if not
-install_docker_compose_if_needed() {
-    if ! command -v docker-compose &> /dev/null; then
-        echo "Docker Compose not found, installing..."
-        sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '\"tag_name\": \"\K[^\"]*')" -o /usr/local/bin/docker-compose
-        sudo chmod +x /usr/local/bin/docker-compose
-        sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-    else
-        echo "Docker Compose is already installed."
     fi
 }
 
 # Function to obtain SSL certificates using Certbot
 obtain_ssl_certificates() {
     sudo certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
+    cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem > /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
+
 }
 
 # Function to create HAProxy configuration files
@@ -103,7 +93,7 @@ EOL
 
     cat <<EOL > $HAPROXY_DIR/sites_available.cfg
 frontend https
-    bind *:443 ssl crt /etc/letsencrypt/live/$DOMAIN/fullchain.pem crt /etc/letsencrypt/live/$DOMAIN/privkey.pem
+    bind *:443 ssl crt /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
     acl workspaces-micro-proxy hdr(host) -i $DOMAIN
     use_backend workspaces-micro-proxy if workspaces-micro-proxy
 
@@ -228,6 +218,20 @@ pull_images() {
     echo "All images pulled successfully."
 }
 
+create_network_if_not_exists() {
+  local network_name=$PROXY_NETWORK
+
+  # Check if the network exists
+  if ! docker network inspect "$network_name" >/dev/null 2>&1; then
+    # Network does not exist, create it
+    docker network create "$network_name"
+    echo "Network '$network_name' created."
+  else
+    # Network exists
+    echo "Network '$network_name' already exists."
+  fi
+}
+
 # Main script execution
 main() {
     # Prompt user for credentials and API base URLs
@@ -237,8 +241,8 @@ main() {
     read -p "Enter API base URL for agent creation and image list (e.g., http://localhost:5001): " API_BASE_URL
     read -p "Enter clientId: " CLIENT_ID
     read -sp "Enter clientSecret: " CLIENT_SECRET
-    echo
-    read -p "Enter agentHost: " AGENT_HOST
+    read -sp "Enter Network Name: " PROXY_NETWORK
+
 
     SOURCE_DIR="."
     HAPROXY_DIR="./haproxy"
@@ -250,11 +254,12 @@ main() {
 
     install_certbot_if_needed
     install_docker_if_needed
-    install_docker_compose_if_needed
 
     obtain_ssl_certificates
     create_haproxy_config
     create_docker_compose_file
+    create_network_if_not_exists
+
 
     echo "Docker Compose and HAProxy configuration files have been created successfully."
     echo "You can now run 'docker-compose up -d' to start the services."
@@ -263,7 +268,9 @@ main() {
 
     read -p "Do you want to start the services now? (y/n): " start_now
     if [[ "$start_now" == "y" ]]; then
-        docker-compose up -d
+        jq 'del(.nodemonConfig.env) | (.. | select(type == "string")) |= sub("../"; "./")' package.json > temp.json && mv temp.json package.json
+        cp -a ../workspaces-micro-commons .
+        docker-compose up -d --build --remove-orphans
     fi
 
     install_jq_if_needed
