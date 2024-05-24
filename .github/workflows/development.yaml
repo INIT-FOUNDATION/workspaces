@@ -9,9 +9,9 @@ on:
       workspaces-micro-sessions:
         type: boolean
         required: false
-      workspaces-micro-proxy:
-        type: boolean
-        required: false
+      # workspaces-micro-proxy:
+      #   type: boolean
+      #   required: false
       workspaces-micro-websocket:
         type: boolean
         required: false
