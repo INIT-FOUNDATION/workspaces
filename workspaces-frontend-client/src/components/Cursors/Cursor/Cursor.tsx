@@ -21,9 +21,12 @@ const Cursor: React.FC<CursorProps> = ({ x, y, label, color }) => {
     top: y,
     color: color,
     cursor: "pointer",
+    transition: "background-color 0.2s ease",
+    width: 10,
+    height: 4
   };
 
-  return <div style={cursorStyle}>{label && truncateName(label)}</div>;
+  return <p style={cursorStyle}>{truncateName(label)}</p>
 };
 
 export default Cursor;

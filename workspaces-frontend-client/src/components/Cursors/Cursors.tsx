@@ -2,6 +2,7 @@ import React, { CSSProperties, useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
 import { workspacesWebsocketBaseUrl } from "../../utils/config";
 import Cursor from "./Cursor/Cursor";
+import useMousePosition from "../../hooks/MousePosition";
 
 interface CursorProps {
   participantId: string | null;
@@ -18,6 +19,7 @@ const Cursors: React.FC<CursorProps> = ({
 }) => {
   const [cursors, setCursors] = useState<any[]>([]);
   const [socket, setSocket] = useState<any>(null);
+  const { x, y } = useMousePosition();
 
   useEffect(() => {
     const newSocket = socketIOClient(workspacesWebsocketBaseUrl);
@@ -34,41 +36,32 @@ const Cursors: React.FC<CursorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || x === null || y === null) return;
 
-    const handleMouseMove = (event: MouseEvent) => {
-      const { clientX, clientY } = event;
+    const workspaceContent = document.documentElement;
+    const workspaceRect = workspaceContent.getBoundingClientRect();
+    const adjustedX = Math.max(
+      Math.min(x - workspaceRect.left, workspaceRect.width),
+      0
+    );
+    const adjustedY = Math.max(
+      Math.min(y - workspaceRect.top, workspaceRect.height),
+      0
+    );
 
-      const workspaceContent = document.documentElement;
-      const workspaceRect = workspaceContent.getBoundingClientRect();
-      const adjustedX = Math.max(
-        Math.min(clientX - workspaceRect.left, workspaceRect.width),
-        0
-      );
-      const adjustedY = Math.max(
-        Math.min(clientY - workspaceRect.top, workspaceRect.height),
-        0
-      );
+    socket.emit(
+      "workspaces_cursors",
+      sessionId,
+      participantId,
+      participantName,
+      adjustedX,
+      adjustedY
+    );
 
-      socket.emit(
-        "workspaces_cursors",
-        sessionId,
-        participantId,
-        participantName,
-        adjustedX,
-        adjustedY
-      );
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, [socket]);
+  }, [socket, x, y]);
 
   return (
-    <div style={{ position: "absolute", top: 0, left: 0, zIndex: "2" }}>
+    <div style={{ position: "absolute", top: 0, left: 0, zIndex: "10" }}>
       {cursors.map((cursor, cursorIndex) => (
         <Cursor
           key={cursorIndex}
