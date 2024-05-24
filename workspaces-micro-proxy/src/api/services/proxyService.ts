@@ -32,8 +32,9 @@ export const proxyService = {
             PortBindings: {},
             SecurityOpt: ["seccomp=unconfined"],
             ShmSize: proxyDetails.sharedMemory,
-            RestartPolicy: { Name: "always" },
+            RestartPolicy: { Name: "no" },
             NetworkMode: networkName,
+            AutoRemove: true,
             Devices: [
               {
                 PathOnHost: soundDevice,
@@ -378,7 +379,7 @@ export const proxyService = {
       const networkExists = networks.some(network => network.Name === networkName);
   
       if (networkExists) {
-        loggerUtils.info(`Network with name ${networkName} already exists.`);
+        loggerUtils.info(`proxyService :: ensureNetworkExists :: Network with name ${networkName} already exists.`);
         return true;
       } else {
         await docker.createNetwork({
@@ -386,7 +387,7 @@ export const proxyService = {
           CheckDuplicate: true,
           Driver: 'bridge', 
         });
-        loggerUtils.info(`Network with name ${networkName} created successfully.`);
+        loggerUtils.info(`proxyService :: ensureNetworkExists :: Network with name ${networkName} created successfully.`);
         return true;
       }
     } catch (error: any) {
