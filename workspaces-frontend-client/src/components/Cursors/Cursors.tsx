@@ -27,6 +27,7 @@ const Cursors: React.FC<CursorProps> = ({
 
     newSocket.on("workspaces_cursors", (data: any) => {
       const parsedCursors = JSON.parse(data);
+      parsedCursors.cursors = parsedCursors.cursors.length > 0 && parsedCursors.cursors.filter((cursor: any) => JSON.parse(cursor).participantId !== participantId)
       setCursors(parsedCursors.cursors);
     });
 
@@ -62,7 +63,7 @@ const Cursors: React.FC<CursorProps> = ({
 
   return (
     <div style={{ position: "absolute", top: 0, left: 0, zIndex: "10" }}>
-      {cursors.map((cursor, cursorIndex) => (
+      {cursors.length > 0 && cursors.map((cursor, cursorIndex) => (
         <Cursor
           key={cursorIndex}
           x={JSON.parse(cursor).xCoordinate}
