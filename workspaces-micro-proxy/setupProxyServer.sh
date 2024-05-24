@@ -145,6 +145,8 @@ EOL
 echo "Docker Compose and HAProxy configuration files have been created successfully."
 echo "You can now run 'docker-compose up -d' to start the services."
 
+docker login ghcr.io
+
 read -p "Do you want to start the services now? (y/n): " start_now
 if [[ "$start_now" == "y" ]]; then
     docker-compose up -d
