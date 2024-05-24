@@ -38,9 +38,12 @@ install_docker_if_needed() {
 
 # Function to obtain SSL certificates using Certbot
 obtain_ssl_certificates() {
-    sudo certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
-    cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem > /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
-
+    if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+        sudo certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
+        cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem > /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
+    else
+        echo "SSL certificates for $DOMAIN already exist. Skipping Certbot."
+    fi
 }
 
 # Function to create HAProxy configuration files
@@ -115,6 +118,19 @@ services:
     networks:
       - workspaces-proxy-network
     restart: always
+    environment:
+      - WORKSPACES_REDIS_KEYS_PREFIX=WORKSPACES|
+      - WORKSPACES_REDIS_HOST=10.200.0.6
+      - WORKSPACES_REDIS_PORT=6379
+      - WORKSPACES_MONGODB_HOST=10.200.0.3
+      - WORKSPACES_MONGODB_PORT=27017
+      - WORKSPACES_MONGODB_DATABASE=workspaces
+      - WORKSPACES_MONGODB_AUTH_SOURCE=admin
+      - WORKSPACES_MONGODB_USERNAME=mongo
+      - WORKSPACES_MONGODB_PASSWORD=419CVN8z592e
+      - WORKSPACES_NODE_CACHE_KEYS_PREFIX=WORKSPACES|
+      - NODE_ENV=Production
+      - WORKSPACES_CLIENT_BASE_URL=https://workspaces.orrizonte.in
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
