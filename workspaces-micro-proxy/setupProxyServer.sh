@@ -240,7 +240,7 @@ main() {
     read -p "Enter API base URL for authentication (e.g., http://localhost:5000): " AUTH_BASE_URL
     read -p "Enter API base URL for agent creation and image list (e.g., http://localhost:5001): " API_BASE_URL
     read -p "Enter clientId: " CLIENT_ID
-    read -sp "Enter clientSecret: " CLIENT_SECRET
+    read -p "Enter clientSecret: " CLIENT_SECRET
     read -sp "Enter Network Name: " PROXY_NETWORK
 
 
