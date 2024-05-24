@@ -8,6 +8,7 @@ HAPROXY_DIR="./haproxy"
 
 mkdir -p $HAPROXY_DIR
 
+# Install Certbot if not installed
 if ! command -v certbot &> /dev/null
 then
     echo "Certbot not found, installing..."
@@ -15,8 +16,41 @@ then
     sudo apt-get install -y certbot
 fi
 
+# Install Docker if not installed
+if ! command -v docker &> /dev/null
+then
+    echo "Docker not found, installing..."
+    sudo apt-get update
+    sudo apt-get install -y \
+        ca-certificates \
+        curl \
+        gnupg \
+        lsb-release
+
+    sudo mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    sudo apt-get update
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+fi
+
+# Install Docker Compose if not installed
+if ! command -v docker-compose &> /dev/null
+then
+    echo "Docker Compose not found, installing..."
+    sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '\"tag_name\": \"\K[^\"]*')" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+fi
+
+# Obtain SSL certificates using Certbot
 sudo certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
 
+# Create HAProxy configuration files
 cat <<EOL > $HAPROXY_DIR/haproxy.cfg
 global
     log 127.0.0.1 local0 debug
@@ -72,6 +106,7 @@ frontend https
     use_backend workspaces-micro-proxy if workspaces-micro-proxy-request workspaces-micro-proxy-domain
 EOL
 
+# Create Docker Compose file
 cat <<EOL > docker-compose.yml
 version: '3'
 
@@ -82,6 +117,8 @@ services:
     networks:
       - workspaces-proxy-network
     restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
   haproxy:
     image: haproxy:latest
