@@ -61,8 +61,9 @@ export default function (app: Express): void {
         nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId }, 300);
         return `http://${sessionId}:3000`
       } else {
-        const { sessionId } = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
-        return `http://${sessionId}:3000`
+        const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
+        if (sessionData.sessionId)
+          return `http://${sessionData.sessionId}:3000`
       }
     } catch (error) {
       loggerUtils.error(`routes :: router :: ${error}`);
