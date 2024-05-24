@@ -4,6 +4,8 @@ import { authController } from "../controllers/authController";
 
 const authRouter = express.Router();
 
+authRouter.get("/health", authController.healthCheck);
+
 authRouter.post("/client", authController.createClient);
 
 authRouter.post("/token", authController.generateToken);

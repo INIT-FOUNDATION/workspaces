@@ -5,6 +5,8 @@ import { clientMiddleware } from "../middleware/clientMiddleware";
 
 const sessionsRouter = express.Router();
 
+sessionsRouter.get("/health", sessionsController.healthCheck);
+
 sessionsRouter.post("/create", clientMiddleware, sessionsController.createSession);
 
 sessionsRouter.get("/list", clientMiddleware, sessionsController.listSessionsByClientId);

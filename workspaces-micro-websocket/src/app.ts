@@ -37,8 +37,8 @@ const MODULE = envUtils.getStringEnvVariableOrDefault(
 
 io.on("connection", websocketController.handleSocketConnection);
 
-app.get("/health", (req, res) => {
-  res.status(HTTP_STATUS_CODES.OK).send(`${MODULE} is up and running.`);
+app.get("/api/v1/websocket/health", (req, res) => {
+  res.status(HTTP_STATUS_CODES.OK).send(`Websocket Service is up and running.`);
 });
 
 server.listen(port, () => {

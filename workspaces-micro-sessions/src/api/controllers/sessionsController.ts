@@ -16,6 +16,19 @@ import { Request } from "../../types/express";
 import { sessionService } from "../services/sessionsService";
 
 export const sessionsController = {
+  healthCheck: async(req: Request, res: Response): Promise<Response> => {
+    try {
+      return res.status(HTTP_STATUS_CODES.OK).send({
+        data: null,
+        message: "Sessions Service is Up and Running!",
+      });
+    } catch (error) {
+      loggerUtils.error(`sessionsController :: healthCheck :: ${error}`);
+      return res
+        .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+        .send(SESSION_ERROR_RESPONSES.SESSERR000);
+    }
+  },
   createSession: async (req: Request, res: Response): Promise<Response> => {
     try {
       const sessionId = req.body.sessionId;

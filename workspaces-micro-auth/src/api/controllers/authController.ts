@@ -8,6 +8,19 @@ import { Client } from "../../models/authModel";
 import { ClientDetails, IClient } from "../../types/custom";
 
 export const authController = {
+  healthCheck: async(req: Request, res: Response): Promise<Response> => {
+    try {
+      return res.status(HTTP_STATUS_CODES.OK).send({
+        data: null,
+        message: "Auth Service is Up and Running!",
+      });
+    } catch (error) {
+      loggerUtils.error(`authController :: healthCheck :: ${error}`);
+      return res
+        .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+        .send(ERROR_RESPONSES.AUTHERR000);
+    }
+  },
   createClient: async (req: Request, res: Response): Promise<Response> => {
     try {
       const clientDetails: ClientDetails = new Client(req.body);

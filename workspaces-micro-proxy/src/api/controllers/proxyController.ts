@@ -5,6 +5,19 @@ import { PROXY_ERROR_RESPONSES } from "../../constants";
 import { validateCreateProxy, validateDeleteProxy } from "../../validations";
 
 export const proxyController = {
+  healthCheck: async(req: Request, res: Response): Promise<Response> => {
+    try {
+      return res.status(HTTP_STATUS_CODES.OK).send({
+        data: null,
+        message: "Proxy Service is Up and Running!",
+      });
+    } catch (error) {
+      loggerUtils.error(`proxyController :: healthCheck :: ${error}`);
+      return res
+        .status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR)
+        .send(PROXY_ERROR_RESPONSES.PROXYERR000);
+    }
+  },
   createProxy: async (req: Request, res: Response): Promise<Response> => {
     try {
       const proxyDetails = req.body;
