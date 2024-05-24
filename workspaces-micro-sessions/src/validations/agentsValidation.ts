@@ -7,7 +7,7 @@ export const validateAgents = (agentDetails: AgentDetails) => {
     agentId: Joi.string().required(),
     agentName: Joi.string().required(),
     agentHost: Joi.string().required(),
-    agentPort: Joi.number().min(1025).max(65535).required(),
+    agentPort: Joi.number().min(80).max(65535).required(),
     sslEnabled: Joi.boolean().required(),
     clientId: Joi.string().required(),
     isActive: Joi.boolean().default(AGENTS_STATUS.ACTIVE).required()
