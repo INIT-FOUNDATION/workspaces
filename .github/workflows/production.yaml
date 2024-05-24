@@ -28,7 +28,7 @@ jobs:
       NODE_ENV: Production
       FRONTEND_BUILD_ENV: prod
       DEPLOYMENTS_PROJECT: TechknowkraftAI/init-deployments
-      DEPLOYMENTS_PROJECT_BRANCH: dev_release
+      DEPLOYMENTS_PROJECT_BRANCH: prod_release
 
     steps:
       - name: Checkout code
