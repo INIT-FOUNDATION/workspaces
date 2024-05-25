@@ -49,23 +49,24 @@ export default function (app: Express): void {
   const router = async (req: Request) => {
     try {
       const proxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080)
+      const proxyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_PATH", "?usr=admin&pwd=admin&cast=1")
       const environment = envUtils.getStringEnvVariableOrDefault(
         "NODE_ENV",
         "Development"
       );
-
+      
       if (environment == "Development") {
-        return `http://localhost:${proxyPort}`
+        return `http://localhost:${proxyPort}${proxyPath}`
       }
 
       if (req && req.params) {
         const { sessionId } = req.params;
         nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId }, CACHE_TTL.HALF_HOUR);
-        return `http://${sessionId}:${proxyPort}`
+        return `http://${sessionId}:${proxyPort}${proxyPath}`
       } else {
         const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
         if (sessionData && sessionData.sessionId) {
-          return `http://${sessionData.sessionId}:${proxyPort}`
+          return `http://${sessionData.sessionId}:${proxyPort}${proxyPath}`
         }
       }
     } catch (error) {
