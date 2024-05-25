@@ -46,7 +46,7 @@ export const proxyService = {
             ],
             Mounts: [],
           },
-          Env: image.defaultEnvs.length > 0 ? [...image.defaultEnvs, `START_URL=${proxyDetails.startUrl}`] : [`START_URL=${proxyDetails.startUrl}`],
+          Env: image.defaultEnvs && image.defaultEnvs.length > 0 ? image.defaultEnvs.map(env => env.replace(envUtils.getStringEnvVariableOrDefault("WORKSPACES_START_URL_DB_PLACEHOLDER", "workspaces-start-url"), proxyDetails.startUrl)): [],
           Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
