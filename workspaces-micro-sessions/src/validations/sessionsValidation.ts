@@ -24,7 +24,7 @@ export const validateSessionDetails = async (
       .valid(...timeZones)
       .required(),
     startUrl: Joi.string().uri().required(),
-    sharedMemory: Joi.number().min(200).max(2000).required(),
+    sharedMemory: Joi.number().min(200).max(40000).required(),
     saveSession: Joi.boolean().required(),
     participantName: Joi.string().allow("", null),
     participantsAccess: Joi.string().allow("", null),
