@@ -1,4 +1,4 @@
-import { envUtils, loggerUtils, mongoUtils } from "workspaces-micro-commons";
+import { CACHE_TTL, MONGO_COLLECTIONS, envUtils, loggerUtils, mongoUtils, nodeCacheUtils } from "workspaces-micro-commons";
 import { IImage, IParticipant, ISession } from "../../types/custom";
 import { IMAGES_STATUS, SESSIONS_STATUS } from "../../constants";
 import { ImageModel } from "../../models/imagesModel";
@@ -57,7 +57,7 @@ export const proxyService = {
             return bindings;
           }, {});
         }
-        
+
         if (proxyDetails.saveSession && image.volumeMountPath)
           createOptions.HostConfig?.Mounts?.push({
             Type: "volume",
@@ -392,6 +392,68 @@ export const proxyService = {
       }
     } catch (error: any) {
       loggerUtils.error(`Error ensuring network exists with name ${networkName}: ${error.message}`);
+      throw error;
+    }
+  },
+  getImageDetailsBySessionId: async (sessionId: string): Promise<IImage> => {
+    try {
+      const key = `SESSION_IMAGE|${sessionId}`;
+      const cachedData: any = await nodeCacheUtils.getKey(key);
+      
+      if (cachedData) return cachedData;
+
+      const pipeline = [
+        {
+          $match: { status: SESSIONS_STATUS.ACTIVE, sessionId },
+        },
+        {
+          $lookup: {
+            from: MONGO_COLLECTIONS.IMAGES,
+            let: { imageId: "$imageId" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$imageId", "$$imageId"] },
+                      { $eq: ["$isActive", IMAGES_STATUS.ACTIVE] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: MONGO_COLLECTIONS.IMAGES,
+          },
+        },
+        {
+          $unwind: `$${MONGO_COLLECTIONS.IMAGES}`
+        },
+        {
+          $replaceRoot: { newRoot: `$${MONGO_COLLECTIONS.IMAGES}` }
+        },
+        {
+          $project: {
+            _id: 0,
+            imageId: 1,
+            runningPorts: 1
+          }
+        }
+      ];
+
+      const images: IImage[] = await mongoUtils.aggregateDocuments<ISession>(
+        SessionModel,
+        pipeline
+      );
+
+      if (images.length > 0) {
+        await nodeCacheUtils.setKey(key, images[0], CACHE_TTL.ONE_HOUR);
+      }
+
+      return images[0];
+    } catch (error) {
+      loggerUtils.error(
+        `proxyService :: getImageDetailsBySessionId :: sessionId ${sessionId} :: ${error}`
+      );
       throw error;
     }
   },
