@@ -50,31 +50,24 @@ export default function (app: Express): void {
 
   const router = async (req: Request) => {
     try {
+      const proxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 3000)
       const environment = envUtils.getStringEnvVariableOrDefault(
         "NODE_ENV",
         "Development"
       );
 
       if (environment == "Development") {
-        if (req.params && req.params.sessionId) {
-          const imageDetails: IImage = await proxyService.getImageDetailsBySessionId(req.params.sessionId);
-          const primaryPort = imageDetails.runningPorts.find(port => port.primary);
-          return `http://localhost:${primaryPort}`
-        }
+        return `http://localhost:${proxyPort}`
       }
 
       if (req && req.params) {
         const { sessionId } = req.params;
-        const imageDetails: IImage = await proxyService.getImageDetailsBySessionId(sessionId);
-        const primaryPort = imageDetails.runningPorts.find(port => port.primary);
         nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId }, CACHE_TTL.HALF_HOUR);
-        return `http://${sessionId}:${primaryPort}`
+        return `http://${sessionId}:${proxyPort}`
       } else {
         const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
-        if (sessionData.sessionId) {
-          const imageDetails: IImage = await proxyService.getImageDetailsBySessionId(sessionData.sessionId);
-          const primaryPort = imageDetails.runningPorts.find(port => port.primary);
-          return `http://${sessionData.sessionId}:${primaryPort}`
+        if (sessionData && sessionData.sessionId) {
+          return `http://${sessionData.sessionId}:${proxyPort}`
         }
       }
     } catch (error) {
