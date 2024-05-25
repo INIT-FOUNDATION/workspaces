@@ -13,6 +13,7 @@ const SessionModel: Model<ISession> =
       startUrl: { type: String, required: true },
       sharedMemory: { type: Number, required: true },
       drawCursors: { type: Boolean, required: true },
+      darkMode: { type: Boolean, required: true },
       imageId: { type: String, required: true },
       saveSession: { type: Boolean, required: true },
       status: { type: Number, required: true }

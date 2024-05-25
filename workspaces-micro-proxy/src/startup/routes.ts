@@ -50,7 +50,7 @@ export default function (app: Express): void {
 
   const router = async (req: Request) => {
     try {
-      const proxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 3000)
+      const proxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080)
       const environment = envUtils.getStringEnvVariableOrDefault(
         "NODE_ENV",
         "Development"

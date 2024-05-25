@@ -12,6 +12,7 @@ export const validateCreateProxy = (proxyDetails: ISession) => {
     startUrl: Joi.string().required(),
     sharedMemory: Joi.number().required(),
     drawCursors: Joi.boolean().required(),
+    darkMode: Joi.boolean().required(),
     participantsAccess: Joi.string().required(),
     participantName: Joi.string(),
     saveSession: Joi.boolean().required(),

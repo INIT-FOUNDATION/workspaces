@@ -28,6 +28,7 @@ export interface ISession extends Document {
   startUrl: string;
   participantsAccess: string;
   drawCursors: boolean;
+  darkMode: boolean;
   sharedMemory: number;
   saveSession: boolean;
   participantName: string;
@@ -44,6 +45,7 @@ export interface SessionDetails {
   startUrl: string;
   participantsAccess: string;
   drawCursors: boolean;
+  darkMode: boolean;
   sharedMemory: number;
   saveSession: boolean;
   imageId: string;

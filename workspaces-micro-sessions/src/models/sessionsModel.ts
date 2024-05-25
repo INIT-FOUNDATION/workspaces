@@ -14,6 +14,7 @@ class Session {
   startUrl: string;
   sharedMemory: number;
   drawCursors: boolean;
+  darkMode: boolean;
   participantName: string;
   participantsAccess: string;
   imageId: string;
@@ -29,6 +30,7 @@ class Session {
     this.startUrl = session.startUrl || envUtils.getStringEnvVariableOrDefault("WORKSPACES_DEFAULT_START_URL", "https://www.google.com")
     this.sharedMemory = session.sharedMemory || envUtils.getNumberEnvVariableOrDefault("WORKSPACES_SHARED_DEFAULT_MEMORY", 500);
     this.drawCursors = session.drawCursors || envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_DRAW_CURSORS", false);
+    this.darkMode = session.darkMode || envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_DARK_MODE", false);
     this.participantName = session.participantName || sessionService.generateRandomParticipantName();
     this.participantsAccess = session.participantsAccess || envUtils.getStringEnvVariableOrDefault("WORKSPACES_DEFAULT_PARTICIPANTS_ACCESS", PARTICIPANT_ACCESS.READ_WRITE);
     this.imageId = session.imageId;
@@ -49,6 +51,7 @@ const SessionModel: Model<ISession> =
       startUrl: { type: String, required: true },
       sharedMemory: { type: Number, required: true },
       drawCursors: { type: Boolean, required: true },
+      darkMode: { type: Boolean, required: true },
       imageId: { type: String, required: true },
       saveSession: { type: Boolean, required: true },
       status: { type: Number, required: true }

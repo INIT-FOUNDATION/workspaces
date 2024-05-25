@@ -22,6 +22,7 @@ export interface IImage extends Document {
     startUrl: string;
     participantsAccess: string;
     drawCursors: boolean;
+    darkMode: boolean;
     sharedMemory: number;
     saveSession: boolean;
     participantName: string;

@@ -28,25 +28,20 @@ export const proxyService = {
 
         await proxyService.ensureNetworkExists(networkName);
 
+        const defaultEnvs = [`START_URL=${proxyDetails.startUrl}`, `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`]
+
         const createOptions: ContainerCreateOptions = {
           name: proxyDetails.sessionId,
           HostConfig: {
+            CapAdd: ['SYS_ADMIN'],
             PortBindings: {},
-            SecurityOpt: ["seccomp=unconfined"],
             ShmSize: proxyDetails.sharedMemory,
             RestartPolicy: { Name: autoRemoval ? "no" : "yes" },
             NetworkMode: networkName,
             AutoRemove: autoRemoval,
-            Devices: [
-              {
-                PathOnHost: soundDevice,
-                PathInContainer: soundDevice,
-                CgroupPermissions: "rwm",
-              },
-            ],
             Mounts: [],
           },
-          Env: image.defaultEnvs && image.defaultEnvs.length > 0 ? image.defaultEnvs.map(env => env.replace(envUtils.getStringEnvVariableOrDefault("WORKSPACES_START_URL_DB_PLACEHOLDER", "workspaces-start-url"), proxyDetails.startUrl)): [],
+          Env: image.defaultEnvs && image.defaultEnvs.length > 0 ? [...image.defaultEnvs, ...defaultEnvs] : defaultEnvs,
           Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
@@ -79,6 +74,7 @@ export const proxyService = {
             startUrl: proxyDetails.startUrl,
             participantsAccess: proxyDetails.participantsAccess,
             drawCursors: proxyDetails.drawCursors,
+            darkMode: proxyDetails.darkMode,
             sharedMemory: proxyDetails.sharedMemory,
             saveSession: proxyDetails.saveSession,
             imageId: proxyDetails.imageId,
