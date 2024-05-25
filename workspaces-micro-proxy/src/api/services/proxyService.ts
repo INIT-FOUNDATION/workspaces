@@ -20,10 +20,12 @@ export const proxyService = {
         proxyDetails.imageId
       );
       const image: IImage = images[0];
-      
+
       const containerSessionExists = await proxyService.dockerContainerExistsByName(proxyDetails.sessionId);
       if (!containerSessionExists) {
+        const autoRemoval = envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_PROXY_CONTAINERS_AUTO_REMOVE", true);
         const networkName = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_CONTAINERS_NETWORK", "workspaces-proxy-network");
+
         await proxyService.ensureNetworkExists(networkName);
 
         const createOptions: ContainerCreateOptions = {
@@ -32,9 +34,9 @@ export const proxyService = {
             PortBindings: {},
             SecurityOpt: ["seccomp=unconfined"],
             ShmSize: proxyDetails.sharedMemory,
-            RestartPolicy: { Name: "no" },
+            RestartPolicy: { Name: autoRemoval ? "no" : "yes" },
             NetworkMode: networkName,
-            AutoRemove: true,
+            AutoRemove: autoRemoval,
             Devices: [
               {
                 PathOnHost: soundDevice,
@@ -258,7 +260,9 @@ export const proxyService = {
 
       if (container) {
         await container.stop();
-        await container.remove();
+        const autoRemoval = envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_PROXY_CONTAINERS_AUTO_REMOVE", true);
+        if (!autoRemoval)
+          await container.remove();
       }
 
       await mongoUtils.updateDocuments<ISession>(
@@ -377,7 +381,7 @@ export const proxyService = {
       const docker: Docker = await proxyService.getDockerClient();
       const networks = await docker.listNetworks();
       const networkExists = networks.some(network => network.Name === networkName);
-  
+
       if (networkExists) {
         loggerUtils.info(`proxyService :: ensureNetworkExists :: Network with name ${networkName} already exists.`);
         return true;
@@ -385,7 +389,7 @@ export const proxyService = {
         await docker.createNetwork({
           Name: networkName,
           CheckDuplicate: true,
-          Driver: 'bridge', 
+          Driver: 'bridge',
         });
         loggerUtils.info(`proxyService :: ensureNetworkExists :: Network with name ${networkName} created successfully.`);
         return true;
