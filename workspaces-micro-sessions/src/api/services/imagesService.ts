@@ -118,6 +118,9 @@ export const imagesService = {
           registryHost: imageDetails.registryHost,
           registryUsername: imageDetails.registryUsername,
           registryPassword: imageDetails.registryPassword,
+          runningPorts: imageDetails.runningPorts && imageDetails.runningPorts.length > 0 ? imageDetails.runningPorts : undefined,
+          volumeMountPath: imageDetails.volumeMountPath || undefined,
+          defaultEnvs: imageDetails.defaultEnvs && imageDetails.defaultEnvs.length > 0 ? imageDetails.defaultEnvs : undefined,
           isActive: imageDetails.isActive != undefined ? imageDetails.isActive : IMAGES_STATUS.ACTIVE,
         }
       );

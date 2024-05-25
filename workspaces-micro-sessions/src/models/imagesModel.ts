@@ -1,5 +1,5 @@
 import { Model, Schema } from "mongoose";
-import { IImage } from "../types/custom";
+import { IImage, RunningPorts } from "../types/custom";
 import { MONGO_COLLECTIONS, mongoUtils } from "workspaces-micro-commons";
 import { randomUUID } from "crypto";
 import { IMAGES_STATUS } from "../constants/imagesStatus";
@@ -14,6 +14,9 @@ class Image {
   registryPassword: string;
   isActive: boolean;
   clientId: string;
+  runningPorts: RunningPorts[];
+  volumeMountPath: string;
+  defaultEnvs: string[];
 
   constructor(image: IImage) {
     this.imageId = image.imageId || randomUUID();
@@ -25,6 +28,9 @@ class Image {
     this.registryPassword = image.registryPassword;
     this.isActive = IMAGES_STATUS.ACTIVE;
     this.clientId = image.clientId;
+    this.runningPorts = image.runningPorts;
+    this.volumeMountPath = image.volumeMountPath;
+    this.defaultEnvs = image.defaultEnvs;
   }
 }
 
@@ -41,6 +47,15 @@ const ImageModel: Model<IImage> = mongoUtils.createModel(
       registryPassword: { type: String },
       isActive: { type: Boolean, required: true },
       clientId: { type: String, required: true },
+      runningPorts: {
+        type: [{
+          port: Number,
+          protocol: String
+        }],
+        required: true
+      },
+      volumeMountPath: { type: String },
+      defaultEnvs: { type: [String] },
     },
     {
       timestamps: true,

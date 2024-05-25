@@ -78,6 +78,9 @@ export interface IImage extends Document {
   registryPassword: string;
   isActive: boolean;
   clientId: string;
+  runningPorts: RunningPorts[];
+  volumeMountPath: string;
+  defaultEnvs: string[];
 }
 
 export interface ImageDetails {
@@ -90,4 +93,12 @@ export interface ImageDetails {
   registryPassword: string;
   isActive: boolean;
   clientId: string;
+  runningPorts: RunningPorts[];
+  volumeMountPath: string;
+  defaultEnvs: string[];
+}
+
+export interface RunningPorts {
+  port: number;
+  protocol: string;
 }

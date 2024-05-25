@@ -117,6 +117,7 @@ export const imagesController = {
     try {
       const imageDetails: ImageDetails = req.body;
       imageDetails.imageId = req.params.imageId;
+      imageDetails.clientId = req.decodedToken.clientId;
 
       const { error } = validateUpdateImage(imageDetails);
 
