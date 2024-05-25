@@ -10,8 +10,6 @@ import {
 } from "workspaces-micro-commons";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { proxyMiddleware } from "../api/middleware/proxyMiddleware";
-import { IImage } from "../types/custom";
-import { proxyService } from "../api/services/proxyService";
 
 export default function (app: Express): void {
   app.use(express.json());
