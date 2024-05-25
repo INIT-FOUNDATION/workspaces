@@ -6,7 +6,7 @@ import {
   redisUtils,
 } from "workspaces-micro-commons";
 import { ClientDetails, IClient } from "../../types/custom";
-import crypto from "crypto";
+import crypto, { randomUUID } from "crypto";
 import { ClientModel } from "../../models/authModel";
 import { CLIENT_STATUS } from "../../constants";
 
@@ -81,7 +81,7 @@ export const authService = {
         clientId: `${clientName.toLowerCase()}-${crypto
           .randomBytes(5)
           .toString("hex")}`,
-        clientSecret: crypto.randomBytes(20).toString("base64"),
+        clientSecret: randomUUID(),
       };
     } catch (error) {
       loggerUtils.error(
@@ -171,6 +171,24 @@ export const authService = {
     } catch (error) {
       loggerUtils.error(
         `authService :: updateClient :: clientId ${clientDetails.clientId} :: ${error}`
+      );
+      throw error;
+    }
+  },
+  clientExistsByCredentials: async (clientId: string, clientSecret: string): Promise<boolean> => {
+    try {
+      const exists: boolean = await mongoUtils.existsDocument<IClient>(
+        ClientModel,
+        {
+          clientId,
+          clientSecret,
+          isActive: CLIENT_STATUS.ACTIVE,
+        }
+      );
+      return exists;
+    } catch (error) {
+      loggerUtils.error(
+        `authService :: clientExists by credentials :: client Id ${clientId} :: clientSecret ${clientSecret} :: ${error}`
       );
       throw error;
     }
