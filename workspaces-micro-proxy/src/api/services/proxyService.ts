@@ -46,27 +46,23 @@ export const proxyService = {
             ],
             Mounts: [],
           },
-          Env: [
-            "PUID=1000",
-            "PGID=1000",
-            `TZ=${proxyDetails.timezone}`,
-            `FIREFOX_CLI=${proxyDetails.startUrl}`,
-          ],
+          Env: image.defaultEnvs.length > 0 ? [...image.defaultEnvs, `START_URL=${proxyDetails.startUrl}`] : [`START_URL=${proxyDetails.startUrl}`],
           Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
-        // Only one session is permitted on development environment
-        if (environment === "Development" && createOptions.HostConfig)
-          createOptions.HostConfig.PortBindings = {
-            "3000/tcp": [{ HostPort: "3000" }],
-            "3001/tcp": [{ HostPort: "3001" }],
-          };
-
-        if (proxyDetails.saveSession)
+        if (environment === "Development" && createOptions.HostConfig && image.runningPorts) {
+          createOptions.HostConfig.PortBindings = image.runningPorts.reduce((bindings, port) => {
+            const key = `${port.port}/${port.protocol}`;
+            (bindings as { [key: string]: { HostPort: string }[] })[key] = [{ HostPort: port.port.toString() }];
+            return bindings;
+          }, {});
+        }
+        
+        if (proxyDetails.saveSession && image.volumeMountPath)
           createOptions.HostConfig?.Mounts?.push({
             Type: "volume",
             Source: proxyDetails.sessionId,
-            Target: "/config",
+            Target: image.volumeMountPath,
           });
 
         const container = await docker.createContainer(createOptions);
@@ -398,5 +394,5 @@ export const proxyService = {
       loggerUtils.error(`Error ensuring network exists with name ${networkName}: ${error.message}`);
       throw error;
     }
-  }
+  },
 };

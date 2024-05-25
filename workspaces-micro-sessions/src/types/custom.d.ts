@@ -101,4 +101,5 @@ export interface ImageDetails {
 export interface RunningPorts {
   port: number;
   protocol: string;
+  primary: Boolean
 }

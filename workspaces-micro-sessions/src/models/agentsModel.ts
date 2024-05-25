@@ -19,7 +19,7 @@ class Agent {
     this.agentName = agent.agentName || agentsService.generateAgentName()
     this.agentHost = agent.agentHost;
     this.agentPort = agent.agentPort || 443;
-    this.sslEnabled = agent.sslEnabled || true;
+    this.sslEnabled = agent.sslEnabled != undefined ? agent.sslEnabled : true;
     this.clientId = agent.clientId;
     this.isActive = AGENTS_STATUS.ACTIVE;
   }

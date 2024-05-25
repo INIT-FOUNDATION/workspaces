@@ -50,7 +50,8 @@ const ImageModel: Model<IImage> = mongoUtils.createModel(
       runningPorts: {
         type: [{
           port: Number,
-          protocol: String
+          protocol: String,
+          primary: Boolean
         }],
         required: true
       },

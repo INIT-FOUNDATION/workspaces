@@ -9,6 +9,9 @@ export interface IImage extends Document {
     registryUsername: string;
     registryPassword: string;
     isActive: boolean;
+    runningPorts: RunningPorts[];
+    volumeMountPath: string;
+    defaultEnvs: string[];
   }
   
   export interface ISession extends Document {
@@ -43,4 +46,10 @@ export interface IImage extends Document {
     sessionId: string;
     role: string;
     access: string;
+  }
+
+  export interface RunningPorts {
+    port: number;
+    protocol: string;
+    primary: boolean;
   }
