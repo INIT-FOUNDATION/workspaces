@@ -86,7 +86,7 @@ export default function (app: Express): void {
     router,
     ws: true,
     changeOrigin: true,
-    pathRewrite: async (path, req) => {
+    pathRewrite: async (path: string, req: Request) => {
       let sessionId, participantId;
 
       if (req.params && req.params.sessionId && req.params.participantId) {
