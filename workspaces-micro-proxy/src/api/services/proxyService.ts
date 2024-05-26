@@ -268,9 +268,11 @@ export const proxyService = {
         }
       );
 
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
       if (proxyDetails.deletePersistence) {
         const volume = await docker.getVolume(proxyDetails.sessionId);
-        if (volume) volume.remove();
+        if (volume) await volume.remove();
       }
     } catch (error) {
       loggerUtils.error(
