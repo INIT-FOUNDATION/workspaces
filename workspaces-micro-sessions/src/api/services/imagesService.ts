@@ -121,6 +121,7 @@ export const imagesService = {
           runningPorts: imageDetails.runningPorts && imageDetails.runningPorts.length > 0 ? imageDetails.runningPorts : undefined,
           volumeMountPath: imageDetails.volumeMountPath || undefined,
           defaultEnvs: imageDetails.defaultEnvs && imageDetails.defaultEnvs.length > 0 ? imageDetails.defaultEnvs : undefined,
+          proxyUrlPath: imageDetails.proxyUrlPath || undefined,
           isActive: imageDetails.isActive != undefined ? imageDetails.isActive : IMAGES_STATUS.ACTIVE,
         }
       );

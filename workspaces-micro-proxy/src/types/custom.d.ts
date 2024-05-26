@@ -12,6 +12,7 @@ export interface IImage extends Document {
     runningPorts: RunningPorts[];
     volumeMountPath: string;
     defaultEnvs: string[];
+    proxyUrlPath: string;
   }
   
   export interface ISession extends Document {

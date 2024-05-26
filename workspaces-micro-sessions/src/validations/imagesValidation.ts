@@ -18,6 +18,7 @@ export const validateImage = (imageDetails: ImageDetails) => {
     })).required(),
     volumeMountPath: Joi.string().allow('', null).regex(/^\/.*/),
     defaultEnvs: Joi.array().items(Joi.string()),
+    proxyUrlPath: Joi.string().allow('', null),
     isActive: Joi.boolean().default(IMAGES_STATUS.ACTIVE).required(),
     clientId: Joi.string().required(),
   });
@@ -29,7 +30,7 @@ export const validateUpdateImage = (imageDetails: ImageDetails) => {
     imageId: Joi.string().required(),
     imageName: Joi.string(),
     imageRepo: Joi.string(),
-    imageTag: Joi.boolean(),
+    imageTag: Joi.string(),
     registryHost: Joi.string().allow("", null),
     registryUsername: Joi.string().allow("", null),
     registryPassword: Joi.string().allow("", null),
@@ -37,9 +38,10 @@ export const validateUpdateImage = (imageDetails: ImageDetails) => {
       port: Joi.number().integer().min(80).max(65535).required(),
       protocol: Joi.string().required(),
       primary: Joi.boolean().required()
-    })).required(),
+    })),
     volumeMountPath: Joi.string().allow('', null).regex(/^\/.*/),
     defaultEnvs: Joi.array().items(Joi.string()),
+    proxyUrlPath: Joi.string().allow('', null),
     isActive: Joi.boolean().default(IMAGES_STATUS.ACTIVE),
     clientId: Joi.string().required(),
   });

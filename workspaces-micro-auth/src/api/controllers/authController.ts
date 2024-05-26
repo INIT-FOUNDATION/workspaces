@@ -85,11 +85,11 @@ export const authController = {
         .status(HTTP_STATUS_CODES.BAD_REQUEST)
         .send(ERROR_RESPONSES.AUTHERR003);
 
-      const token: { token: string, ttl: number } = await authService.generateToken(credentials);
+      const tokenDetails: any = await authService.generateToken(credentials);
 
       return res.status(HTTP_STATUS_CODES.OK).send({
-        data: { token },
-        message: `Token Generated Successfully, Will expire in ${token.ttl} seconds`,
+        data: { token: tokenDetails.token, ttl: tokenDetails.ttl },
+        message: `Token Generated Successfully, Will expire in ${tokenDetails.ttl} seconds`,
       });
     } catch (error) {
       loggerUtils.error(`authController :: token :: ${error}`);

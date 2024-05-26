@@ -83,6 +83,7 @@ export interface IImage extends Document {
   runningPorts: RunningPorts[];
   volumeMountPath: string;
   defaultEnvs: string[];
+  proxyUrlPath: string;
 }
 
 export interface ImageDetails {
@@ -98,6 +99,7 @@ export interface ImageDetails {
   runningPorts: RunningPorts[];
   volumeMountPath: string;
   defaultEnvs: string[];
+  proxyUrlPath: string;
 }
 
 export interface RunningPorts {

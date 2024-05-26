@@ -17,6 +17,7 @@ class Image {
   runningPorts: RunningPorts[];
   volumeMountPath: string;
   defaultEnvs: string[];
+  proxyUrlPath: string;
 
   constructor(image: IImage) {
     this.imageId = image.imageId || randomUUID();
@@ -31,6 +32,7 @@ class Image {
     this.runningPorts = image.runningPorts;
     this.volumeMountPath = image.volumeMountPath;
     this.defaultEnvs = image.defaultEnvs;
+    this.proxyUrlPath = image.proxyUrlPath;
   }
 }
 
@@ -57,6 +59,7 @@ const ImageModel: Model<IImage> = mongoUtils.createModel(
       },
       volumeMountPath: { type: String },
       defaultEnvs: { type: [String] },
+      proxyUrlPath: { type: String }
     },
     {
       timestamps: true,

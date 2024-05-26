@@ -20,6 +20,7 @@ const imageSchema = new Schema<IImage>({
   },
   volumeMountPath: { type: String },
   defaultEnvs: { type: [String] },
+  proxyUrlPath: { type: String},
   isActive: { type: Boolean, required: true },
 }, {
   timestamps: true,

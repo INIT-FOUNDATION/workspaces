@@ -15,7 +15,7 @@ export default function (app: Express): void {
           if (riskyChars.indexOf(req.body[key].charAt(0)) >= 0) {
             req.body[key] = req.body[key].slice(1);
           }
-          req.body[key] = req.body[key].replace(/{|}|>|<|=/g, "");
+          req.body[key] = req.body[key].replace(new RegExp(`[${riskyChars.join('')}]`, 'g'), "");
         }
       }
     }

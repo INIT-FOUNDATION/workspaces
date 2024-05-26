@@ -431,7 +431,8 @@ export const proxyService = {
           $project: {
             _id: 0,
             imageId: 1,
-            runningPorts: 1
+            runningPorts: 1,
+            proxyUrlPath: 1
           }
         }
       ];
