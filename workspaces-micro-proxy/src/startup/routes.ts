@@ -3,9 +3,9 @@ import bodyParser from "body-parser";
 import { proxyRouter } from "../api/routes/proxyRouter";
 import {
   CACHE_TTL,
+  HTTP_STATUS_CODES,
   envUtils,
   expressConstants,
-  loggerUtils,
   nodeCacheUtils,
 } from "workspaces-micro-commons";
 import { createProxyMiddleware } from "http-proxy-middleware";
@@ -48,50 +48,56 @@ export default function (app: Express): void {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
 
-  const router = async (req: Request) => {
+  app.use('/api/v1/session/:sessionId/:participantId', proxyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const defaultProxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080)
-      const defaultProxyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_PATH", "")
-      const environment = envUtils.getStringEnvVariableOrDefault(
-        "NODE_ENV",
-        "Development"
-      );
+      const defaultProxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080);
+      const defaultProxyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_PATH", "");
+      const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development");
+      let targetPath, sessionId, participantId;
 
       if (req && req.params) {
-        const { sessionId } = req.params;
+        sessionId = req.params.sessionId;
+        participantId = req.params.participantId;
+
         const image: IImage = await proxyService.getImageDetailsBySessionId(sessionId);
         const primaryPortDetails = image.runningPorts.find(runningPort => runningPort.primary);
+
         const proxyPort = primaryPortDetails?.port || defaultProxyPort;
         const proxyPath = image.proxyUrlPath || defaultProxyPath;
-        nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId }, CACHE_TTL.HALF_HOUR);
-        return `http://${environment === "Development" ? "localhost" : sessionId}:${proxyPort}${proxyPath}`
+
+        nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId, participantId }, CACHE_TTL.ONE_HOUR);
+        targetPath = `http://${environment === "Development" ? "localhost" : sessionId}:${proxyPort}${proxyPath}`;
       } else {
-        const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
-        if (sessionData && sessionData.sessionId) {
+        const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION');
+        if (sessionData && sessionData.sessionId && sessionData.participantId) {
+          sessionId = sessionData.sessionId;
+          participantId = sessionData.participantId;
+
           const image: IImage = await proxyService.getImageDetailsBySessionId(sessionData.sessionId);
           const primaryPortDetails = image.runningPorts.find(runningPort => runningPort.primary);
+
           const proxyPort = primaryPortDetails?.port || defaultProxyPort;
           const proxyPath = image.proxyUrlPath || defaultProxyPath;
-          return `http://${environment === "Development" ? "localhost" : sessionData.sessionId}:${proxyPort}${proxyPath}`
+
+          targetPath = `http://${environment === "Development" ? "localhost" : sessionData.sessionId}:${proxyPort}${proxyPath}`;
         }
       }
+
+      if (targetPath) {
+        createProxyMiddleware({
+          target: targetPath,
+          ws: true,
+          changeOrigin: true,
+          xfwd: true,
+          pathRewrite: {
+            [`^/api/v1/session/${sessionId}/${participantId}`]: '',
+          },
+        })(req, res, next);
+      } else {
+        res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send("routes :: Unable to determine target path.");
+      }
     } catch (error) {
-      loggerUtils.error(`routes :: router :: ${error}`);
-      throw error;
+      next(error);
     }
-  };
-
-  const proxyOptions = {
-    changeOrigin: true,
-    ws: true,
-    router,
-  };
-
-  app.use(
-    "/api/v1/proxy/:sessionId/:participantId",
-    proxyMiddleware,
-    createProxyMiddleware<Request, Response>(proxyOptions)
-  );
-
-  app.use("/api/v1/proxy", proxyRouter);
+  });
 }
