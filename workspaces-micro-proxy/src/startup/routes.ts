@@ -90,7 +90,7 @@ export default function (app: Express): void {
           changeOrigin: true,
           xfwd: true,
           pathRewrite: {
-            [`^/api/v1/session/${sessionId}/${participantId}`]: '',
+            [`^/api/v1/proxy/${sessionId}/${participantId}`]: '',
           },
         })(req, res, next);
       } else {
