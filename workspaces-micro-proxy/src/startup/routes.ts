@@ -48,7 +48,7 @@ export default function (app: Express): void {
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: false }));
 
-  app.use('/api/v1/session/:sessionId/:participantId', proxyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  app.use('/api/v1/proxy/:sessionId/:participantId', proxyMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const defaultProxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080);
       const defaultProxyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_PATH", "");
