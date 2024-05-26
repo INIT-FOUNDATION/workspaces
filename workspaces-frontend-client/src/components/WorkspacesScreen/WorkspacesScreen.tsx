@@ -19,7 +19,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
 }) => {
   useEffect(() => {
     const scheme = agentSSLEnabled ? "https" : "http";
-    const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/`;
+    const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=admin&pwd=admin`;
     const iframe = document.createElement("iframe");
     iframe.src = url;
     iframe.style.position = "absolute";

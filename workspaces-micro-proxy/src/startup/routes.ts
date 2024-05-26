@@ -98,7 +98,7 @@ export default function (app: Express): void {
         sessionId = sessionData.sessionId;
         participantId = sessionData.participantId;
       }
-      return path.replace(`/api/v1/session/${sessionId}/${participantId}`, '');
+      return path.replace(`/api/v1/proxy/${sessionId}/${participantId}`, '');
     }
   }
 

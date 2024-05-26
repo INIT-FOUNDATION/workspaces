@@ -41,7 +41,8 @@ export async function proxyMiddleware(
         .send(PROXY_ERROR_RESPONSES.PROXYERR007);
     }
 
-    const participantExists: boolean = await proxyService.participantExistsById(
+    const participantExists: boolean = await proxyService.participantExistsBySessionAndId(
+      sessionId.toString(),
       participantId.toString()
     );
 

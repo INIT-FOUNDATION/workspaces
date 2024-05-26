@@ -118,11 +118,12 @@ export const proxyService = {
       throw error;
     }
   },
-  participantExistsById: async (participantId: string): Promise<boolean> => {
+  participantExistsBySessionAndId: async (sessionId: string, participantId: string): Promise<boolean> => {
     try {
       const exists = await mongoUtils.existsDocument<IParticipant>(
         ParticipantModel,
         {
+          sessionId,
           participantId,
         }
       );
