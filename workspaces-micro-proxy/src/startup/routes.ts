@@ -100,4 +100,6 @@ export default function (app: Express): void {
       next(error);
     }
   });
+
+  app.use("/api/v1/proxy", proxyRouter);
 }
