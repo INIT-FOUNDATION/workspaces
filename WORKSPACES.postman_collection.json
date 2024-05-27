@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"clientName\": \"BAMBINOS\",\n    \"sessionsLimit\": 100,\n    \"sessionConcurrencyLimit\": 10,\n    \"accessExpiryDate\": \"2024-05-30\"\n}",
+							"raw": "{\n    \"clientName\": \"BAMBINOS\",\n    \"sessionsLimit\": 100,\n    \"sessionConcurrencyLimit\": 20,\n    \"accessExpiryDate\": \"2025-05-30\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -24,12 +24,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/v1/auth/client",
-							"protocol": "http",
+							"raw": "{{AUTH_BASE_URL}}/api/v1/auth/client",
 							"host": [
-								"localhost"
+								"{{AUTH_BASE_URL}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"v1",
@@ -42,12 +40,36 @@
 				},
 				{
 					"name": "Generate Token",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.environment.set(\"authToken\", jsonData.data.token);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"clientId\": \"bambinos-be56ab3917\",\n        \"clientSecret\": \"g24KWRE47sQ3+9SkYh/4RVlMXmc=\"\n}",
+							"raw": "{\n        \"clientId\": \"bambinos-014107aee7\",\n        \"clientSecret\": \"0affd7bf-c175-474e-a7a9-076af89bed80\"\n    }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -55,12 +77,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/v1/auth/token",
-							"protocol": "http",
+							"raw": "{{AUTH_BASE_URL}}/api/v1/auth/token",
 							"host": [
-								"localhost"
+								"{{AUTH_BASE_URL}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"v1",
@@ -86,12 +106,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/v1/auth/client/bambinos1-1bd51c96ea",
-							"protocol": "http",
+							"raw": "{{AUTH_BASE_URL}}/api/v1/auth/client/bambinos1-1bd51c96ea",
 							"host": [
-								"localhost"
+								"{{AUTH_BASE_URL}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"v1",
@@ -118,12 +136,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/v1/auth/client/bambinos1-1bd51c96ea",
-							"protocol": "http",
+							"raw": "{{AUTH_BASE_URL}}/api/v1/auth/client/bambinos1-1bd51c96ea",
 							"host": [
-								"localhost"
+								"{{AUTH_BASE_URL}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"v1",
@@ -153,12 +169,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/v1/auth/client/bambinos1-1bd51c96ea",
-							"protocol": "http",
+							"raw": "{{AUTH_BASE_URL}}/api/v1/auth/client/bambinos1-1bd51c96ea",
 							"host": [
-								"localhost"
+								"{{AUTH_BASE_URL}}"
 							],
-							"port": "5000",
 							"path": [
 								"api",
 								"v1",
@@ -185,13 +199,13 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4NjI3LCJleHAiOjE3MTUyOTk1Mjd9.BrTMEEnfYDpRUwU960wR2n853SdJZjDYW3E-8sQp0ZI",
+										"value": "Bearer {{authToken}}",
 										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
+									"raw": "{\n    \"imageName\": \"chrome\",\n    \"imageRepo\": \"ghcr.io/techknowkraftai/workspaces\",\n    \"imageTag\": \"google-chrome\",\n    \"runningPorts\": [\n        {\n            \"port\": 8080,\n            \"protocol\": \"tcp\",\n            \"primary\": true\n        },\n        {\n            \"port\": 52000,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52001,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52002,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52003,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52004,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52005,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52006,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52007,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52008,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52009,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52010,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52011,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52012,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52013,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52014,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52015,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52016,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52017,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52018,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52019,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52020,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52021,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52022,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52023,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52024,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52025,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52026,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52027,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52028,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52029,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52030,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52031,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52032,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52033,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52034,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52035,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52036,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52037,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52038,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52039,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52040,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52041,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52042,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52043,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52044,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52045,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52046,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52047,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52048,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52049,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52050,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52051,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52052,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52053,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52054,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52055,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52056,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52057,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52058,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52059,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52060,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52061,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52062,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52063,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52064,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52065,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52066,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52067,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52068,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52069,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52070,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52071,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52072,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52073,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52074,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52075,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52076,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52077,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52078,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52079,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52080,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52081,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52082,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52083,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52084,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52085,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52086,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52087,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52088,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52089,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52090,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52091,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52092,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52093,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52094,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52095,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52096,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52097,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52098,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52099,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        },\n        {\n            \"port\": 52100,\n            \"protocol\": \"udp\",\n            \"primary\": false\n        }\n    ],\n    \"defaultEnvs\": [\n        \"NEKO_SCREEN=2560x1440@30\",\n        \"NEKO_PASSWORD=neko\",\n        \"NEKO_PASSWORD_ADMIN=admin\",\n        \"NEKO_EPR=52000-52100\",\n        \"NEKO_IMPLICIT_CONTROL=true\",\n        \"NEKO_PROXY=true\"\n    ],\n    \"volumeMountPath\": \"/home/neko/.config/google-chrome\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -199,12 +213,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/images/create",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/images/create",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
@@ -222,7 +234,13 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
@@ -233,17 +251,15 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/images/0bc2a3bd-6d7b-4161-85ca-10512d4ff74b",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/images/2b2da76c-970e-4838-a8b1-41d2fcd74364",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
 										"images",
-										"0bc2a3bd-6d7b-4161-85ca-10512d4ff74b"
+										"2b2da76c-970e-4838-a8b1-41d2fcd74364"
 									]
 								}
 							},
@@ -256,7 +272,13 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\n    \"imageName\": \"chromium\",\n    \"imageRepo\": \"lscr.io/linuxserver/chromium\"\n}",
@@ -267,12 +289,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/images/list",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/images/list",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
@@ -287,10 +307,16 @@
 							"name": "Update Image",
 							"request": {
 								"method": "PUT",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"imageName\": \"chrome\"\n}",
+									"raw": "{\n    \"imageRepo\": \"ghcr.io/techknowkraftai/workspaces\",\n    \"imageTag\": \"google-chrome\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -298,17 +324,15 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/images/0bc2a3bd-6d7b-4161-85ca-10512d4ff74b",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/images/c4c2da60-9f49-4c26-99c6-f60fa8e09c7a",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
 										"images",
-										"0bc2a3bd-6d7b-4161-85ca-10512d4ff74b"
+										"c4c2da60-9f49-4c26-99c6-f60fa8e09c7a"
 									]
 								}
 							},
@@ -318,7 +342,13 @@
 							"name": "Delete Image",
 							"request": {
 								"method": "DELETE",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "",
@@ -329,12 +359,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/images/0bc2a3bd-6d7b-4161-85ca-10512d4ff74b",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/images/0bc2a3bd-6d7b-4161-85ca-10512d4ff74b",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
@@ -357,7 +385,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zLWJlNTZhYjM5MTciLCJjbGllbnRTZWNyZXQiOiJnMjRLV1JFNDdzUTMrOVNrWWgvNFJWbE1YbWMiLCJpYXQiOjE3MTUzMzQ1MDIsImV4cCI6MTcxNTMzODEwMn0.4F6jZMXDu1vYmlUx84Y68-TXJmTH4qJc6aSaYZjrc7A",
+										"value": "Bearer {{authToken}}",
 										"type": "text"
 									}
 								],
@@ -371,12 +399,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/agents/create",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/agents/create",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
@@ -397,7 +423,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"value": "Bearer {{authToken}}",
 										"type": "text"
 									}
 								],
@@ -411,12 +437,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
@@ -437,7 +461,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"value": "Bearer {{authToken}}",
 										"type": "text"
 									}
 								],
@@ -451,12 +475,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/agents/list",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/agents/list",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
@@ -474,13 +496,13 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"value": "Bearer {{authToken}}",
 										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"agentPort\": 8081\n}",
+									"raw": "{\n    \"sslEnabled\": false\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -488,17 +510,15 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/agents/5987d690-0cdf-4b30-8e65-5119cd893c48",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
 										"agents",
-										"51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9"
+										"5987d690-0cdf-4b30-8e65-5119cd893c48"
 									]
 								}
 							},
@@ -511,7 +531,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk4MDkzLCJleHAiOjE3MTUyOTg5OTN9.UPVQTbIEp59e39bg-XuoXPWyERA0V9_7M1sFj6xiiXs",
+										"value": "Bearer {{authToken}}",
 										"type": "text"
 									}
 								],
@@ -525,12 +545,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5001/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
-									"protocol": "http",
+									"raw": "{{SESSIONS_BASE_URL}}/api/v1/agents/51ad720a-4e25-46d8-bcb2-fd91d8dcd6d9",
 									"host": [
-										"localhost"
+										"{{SESSIONS_BASE_URL}}"
 									],
-									"port": "5001",
 									"path": [
 										"api",
 										"v1",
@@ -590,7 +608,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1Mjk5NTc0LCJleHAiOjE3MTUzMDA0NzR9.lTadjadtaP8xNISDb-sReD6PJDB8z-P3pVBvrA9p2TQ",
+								"value": "Bearer {{authToken}}",
 								"type": "text"
 							}
 						],
@@ -604,12 +622,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5001/api/v1/sessions/6b640059-e4d1-48b9-bd3c-2441ba754fae",
-							"protocol": "http",
+							"raw": "{{SESSIONS_BASE_URL}}/api/v1/sessions/6b640059-e4d1-48b9-bd3c-2441ba754fae",
 							"host": [
-								"localhost"
+								"{{SESSIONS_BASE_URL}}"
 							],
-							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -630,7 +646,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1MzAwNTY1LCJleHAiOjE3MTUzMDE0NjV9.7nIymEyLwlP8g-wbDndMK3vG_iza65Vu0sDfp2Vpt8g",
+								"value": "Bearer {{authToken}}",
 								"type": "text"
 							}
 						],
@@ -644,14 +660,12 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5001/api/v1/sessions/list",
-							"protocol": "http",
+							"raw": "{{SESSIONS_BASE_URL}}/qapi/v1/sessions/list",
 							"host": [
-								"localhost"
+								"{{SESSIONS_BASE_URL}}"
 							],
-							"port": "5001",
 							"path": [
-								"api",
+								"qapi",
 								"v1",
 								"sessions",
 								"list"
@@ -667,13 +681,13 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1MzAwNTY1LCJleHAiOjE3MTUzMDE0NjV9.7nIymEyLwlP8g-wbDndMK3vG_iza65Vu0sDfp2Vpt8g",
+								"value": "Bearer {{authToken}}",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"participantId\": \"a573a987-9f87-42ac-894a-49451e5e50bf\",\n    \"access\": \"read\"\n}",
+							"raw": "{\n    \"participantId\": \"fd1bb99c-1f9b-4ff0-a303-4e9e36cfc202\",\n    \"access\": \"read_write\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -681,12 +695,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5001/api/v1/sessions/setPermissions",
-							"protocol": "http",
+							"raw": "{{SESSIONS_BASE_URL}}/api/v1/sessions/setPermissions",
 							"host": [
-								"localhost"
+								"{{SESSIONS_BASE_URL}}"
 							],
-							"port": "5001",
 							"path": [
 								"api",
 								"v1",
@@ -704,13 +716,13 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6ImJhbWJpbm9zMS0xYmQ1MWM5NmVhIiwiY2xpZW50U2VjcmV0IjoiazNRZWZKbTNwalRuNzBTRXRHZUhCS3JkSnBBIiwiaWF0IjoxNzE1MzAwNTY1LCJleHAiOjE3MTUzMDE0NjV9.7nIymEyLwlP8g-wbDndMK3vG_iza65Vu0sDfp2Vpt8g",
+								"value": "Bearer {{authToken}}",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"deletePersistence\": false\n}",
+							"raw": "{\n    \"deletePersistence\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -718,17 +730,15 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5001/api/v1/sessions/127aeb23-a626-4083-83b0-6023787ef096",
-							"protocol": "http",
+							"raw": "{{SESSIONS_BASE_URL}}/api/v1/sessions/18b9ea74-7540-4267-bf78-1f72c9f247e8",
 							"host": [
-								"localhost"
+								"{{SESSIONS_BASE_URL}}"
 							],
-							"port": "5001",
 							"path": [
 								"api",
 								"v1",
 								"sessions",
-								"127aeb23-a626-4083-83b0-6023787ef096"
+								"18b9ea74-7540-4267-bf78-1f72c9f247e8"
 							]
 						}
 					},
@@ -743,7 +753,13 @@
 					"name": "Create Proxy",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"sessionId\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n    \"agentId\": \"1ed7c5aa-8b2b-4b92-b4fd-bc82ac39a92d\",\n    \"imageId\": \"db027ff3-3412-4ba9-90d5-1d91f3849c3f\",\n    \"imageName\": \"chrome\",\n    \"clientId\": \"a877e9e1-5f80-4a6a-bb5f-15d07d48c261\",\n    \"timezone\": \"Asia/Kolkata\",\n    \"startUrl\": \"https://www.google.com\",\n    \"sharedMemory\": 1024,\n    \"drawCursors\": true,\n    \"participantsAccess\": \"read_write\",\n    \"participantName\": \"John Doe\",\n    \"saveSession\": true,\n    \"status\": 1\n}\n",
@@ -754,12 +770,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5002/api/v1/proxy/create",
-							"protocol": "http",
+							"raw": "{{PROXY_BASE_URL}}/api/v1/proxy/create",
 							"host": [
-								"localhost"
+								"{{PROXY_BASE_URL}}"
 							],
-							"port": "5002",
 							"path": [
 								"api",
 								"v1",
@@ -774,14 +788,18 @@
 					"name": "Get Proxy",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "http://localhost:5002/api/v1/proxy/:sessionId/:participantId",
-							"protocol": "http",
+							"raw": "{{PROXY_BASE_URL}}/api/v1/proxy/:sessionId/:participantId",
 							"host": [
-								"localhost"
+								"{{PROXY_BASE_URL}}"
 							],
-							"port": "5002",
 							"path": [
 								"api",
 								"v1",
@@ -807,7 +825,13 @@
 					"name": "Delete Proxy",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"deletePersistence\": true\n}",
@@ -818,12 +842,10 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5002/api/v1/proxy/:sessionId",
-							"protocol": "http",
+							"raw": "{{PROXY_BASE_URL}}/api/v1/proxy/:sessionId",
 							"host": [
-								"localhost"
+								"{{PROXY_BASE_URL}}"
 							],
-							"port": "5002",
 							"path": [
 								"api",
 								"v1",
