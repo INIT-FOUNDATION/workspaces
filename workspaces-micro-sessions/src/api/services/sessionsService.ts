@@ -67,9 +67,8 @@ export const sessionService = {
           const availableAgent = availableAgents[0];
           sessionDetails.agentId = availableAgent.agentId;
 
-          const baseUrl = `${availableAgent.sslEnabled ? "https" : "http"}://${
-            availableAgent.agentHost
-          }:${availableAgent.agentPort}/api/v1/proxy/create`;
+          const baseUrl = `${availableAgent.sslEnabled ? "https" : "http"}://${availableAgent.agentHost
+            }:${availableAgent.agentPort}/api/v1/proxy/create`;
 
           await proxyService.createProxy(sessionDetails, baseUrl);
 
@@ -128,13 +127,12 @@ export const sessionService = {
 
 
       const existingSessionsData: ISession[] = await sessionService.getSessionById(sessionDetails.sessionId);
-      const existingSessionData: ISession  = existingSessionsData[0];
+      const existingSessionData: ISession = existingSessionsData[0];
 
       sessionDetails.imageId = existingSessionData.imageId;
-      
-      const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${
-        agent.agentHost
-      }:${agent.agentPort}/api/v1/proxy/create`;
+
+      const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${agent.agentHost
+        }:${agent.agentPort}/api/v1/proxy/create`;
 
       await proxyService.createProxy(sessionDetails, baseUrl);
 
@@ -180,7 +178,7 @@ export const sessionService = {
         SessionModel,
         {
           sessionId,
-          status: SESSIONS_STATUS.ACTIVE,
+          status: { $ne: SESSIONS_STATUS.DELETED },
         }
       );
       return exists;
@@ -193,6 +191,12 @@ export const sessionService = {
   },
   getSessionById: async (sessionId: string): Promise<ISession[]> => {
     try {
+      const key = `SESSION|ID:${sessionId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
       const sessions: ISession[] =
         await mongoUtils.findDocumentsWithOptions<ISession>(
           SessionModel,
@@ -210,6 +214,7 @@ export const sessionService = {
           },
           {}
         );
+      redisUtils.setKey(key, JSON.stringify(sessions), CACHE_TTL.ONE_DAY);
       return sessions;
     } catch (error) {
       loggerUtils.error(
@@ -220,6 +225,12 @@ export const sessionService = {
   },
   listSessionsByClientId: async (clientId: string): Promise<ISession[]> => {
     try {
+      const key = `SESSIONS|CLIENT:${clientId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
       const sessions: ISession[] =
         await mongoUtils.findDocumentsWithOptions<ISession>(
           SessionModel,
@@ -237,6 +248,7 @@ export const sessionService = {
           },
           {}
         );
+      redisUtils.setKey(key, JSON.stringify(sessions), CACHE_TTL.ONE_DAY);
       return sessions;
     } catch (error) {
       loggerUtils.error(
@@ -258,9 +270,8 @@ export const sessionService = {
       }
 
       const agent: IAgent = agents[0];
-      const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${
-        agent.agentHost
-      }:${agent.agentPort}/api/v1/proxy`;
+      const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${agent.agentHost
+        }:${agent.agentPort}/api/v1/proxy`;
 
       await proxyService.destroyProxy(sessionId, deletePersistence, baseUrl);
     } catch (error) {
@@ -290,9 +301,8 @@ export const sessionService = {
     }
   },
   generateRandomParticipantName: (): string => {
-    return `Guest-${
-      Math.floor(Math.random() * (9999999 - 1000000 + 1)) + 1000000
-    }`;
+    return `Guest-${Math.floor(Math.random() * (9999999 - 1000000 + 1)) + 1000000
+      }`;
   },
   participantExistsById: async (participantId: string): Promise<boolean> => {
     try {

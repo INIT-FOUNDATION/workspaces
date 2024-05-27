@@ -99,7 +99,7 @@ export const imagesController = {
           .status(HTTP_STATUS_CODES.BAD_REQUEST)
           .send(IMAGE_ERROR_RESPONSES.IMAGEERR003);
 
-      await imagesService.deleteImageById(imageId);
+      await imagesService.deleteImageById(imageId, req.decodedToken.clientId);
 
       return res.status(HTTP_STATUS_CODES.OK).send({
         data: { imageId },

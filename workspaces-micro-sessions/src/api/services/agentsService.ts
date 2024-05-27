@@ -1,7 +1,9 @@
 import {
+  CACHE_TTL,
   MONGO_COLLECTIONS,
   loggerUtils,
   mongoUtils,
+  redisUtils,
 } from "workspaces-micro-commons";
 import {
   uniqueNamesGenerator,
@@ -32,6 +34,12 @@ export const agentsService = {
   },
   getAgentById: async (agentId: string): Promise<IAgent[]> => {
     try {
+      const key = `AGENT|ID:${agentId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
       const agents: IAgent[] =
         await mongoUtils.findDocumentsWithOptions<IAgent>(
           AgentModel,
@@ -49,6 +57,7 @@ export const agentsService = {
           },
           {}
         );
+      redisUtils.setKey(key, JSON.stringify(agents), CACHE_TTL.ONE_DAY);
       return agents;
     } catch (error) {
       loggerUtils.error(
@@ -76,6 +85,12 @@ export const agentsService = {
   },
   listAgentsByClientId: async (clientId: string): Promise<IAgent[]> => {
     try {
+      const key = `AGENTS|CLIENT:${clientId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
       const agents: IAgent[] =
         await mongoUtils.findDocumentsWithOptions<IAgent>(
           AgentModel,
@@ -93,6 +108,7 @@ export const agentsService = {
           },
           {}
         );
+      redisUtils.setKey(key, JSON.stringify(agents), CACHE_TTL.ONE_DAY);
       return agents;
     } catch (error) {
       loggerUtils.error(
@@ -116,6 +132,8 @@ export const agentsService = {
           isActive: agentDetails.isActive != undefined ? agentDetails.isActive : AGENTS_STATUS.ACTIVE,
         }
       );
+      redisUtils.delKey(`AGENT|ID:${agentDetails.agentId}`);
+      redisUtils.delKey(`AGENTS|CLIENT:${agentDetails.clientId}`);
     } catch (error) {
       loggerUtils.error(
         `authService :: updateAgentById :: agent Id ${agentDetails.agentId} :: ${error}`
@@ -123,7 +141,7 @@ export const agentsService = {
       throw error;
     }
   },
-  deleteAgentById: async (agentId: string) => {
+  deleteAgentById: async (agentId: string, clientId: string) => {
     try {
       await mongoUtils.updateDocuments<IAgent>(
         AgentModel,
@@ -134,9 +152,11 @@ export const agentsService = {
           isActive: AGENTS_STATUS.INACTIVE,
         }
       );
+      redisUtils.delKey(`AGENT|ID:${agentId}`);
+      redisUtils.delKey(`AGENTS|CLIENT:${clientId}`);
     } catch (error) {
       loggerUtils.error(
-        `authService :: deleteAgentById :: agent Id ${agentId} :: ${error}`
+        `authService :: deleteAgentById :: agentId ${agentId} :: clientId ${clientId} :: ${error}`
       );
       throw error;
     }

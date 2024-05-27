@@ -1,4 +1,4 @@
-import { CACHE_TTL, MONGO_COLLECTIONS, envUtils, loggerUtils, mongoUtils, nodeCacheUtils } from "workspaces-micro-commons";
+import { CACHE_TTL, MONGO_COLLECTIONS, envUtils, loggerUtils, mongoUtils, nodeCacheUtils, redisUtils } from "workspaces-micro-commons";
 import { IImage, IParticipant, ISession } from "../../types/custom";
 import { IMAGES_STATUS, SESSIONS_STATUS } from "../../constants";
 import { ImageModel } from "../../models/imagesModel";
@@ -274,6 +274,9 @@ export const proxyService = {
         const volume = await docker.getVolume(proxyDetails.sessionId);
         if (volume) await volume.remove();
       }
+
+      redisUtils.delKey(`SESSION|ID:${proxyDetails.sessionId}`);
+      redisUtils.delKey(`SESSIONS|CLIENT:${proxyDetails.clientId}`);
     } catch (error) {
       loggerUtils.error(
         `proxyService :: destroyProxy :: proxyDetails ${JSON.stringify(

@@ -92,7 +92,7 @@ export const agentsController = {
       .status(HTTP_STATUS_CODES.BAD_REQUEST)
       .send(AGENT_ERROR_RESPONSES.AGENTERR003);
   
-      await agentsService.deleteAgentById(agentId);
+      await agentsService.deleteAgentById(agentId, req.decodedToken.clientId);
   
       return res.status(HTTP_STATUS_CODES.OK).send({
         data: { agentId },

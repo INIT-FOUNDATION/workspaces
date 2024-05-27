@@ -1,4 +1,4 @@
-import { loggerUtils, mongoUtils } from "workspaces-micro-commons";
+import { CACHE_TTL, loggerUtils, mongoUtils, redisUtils } from "workspaces-micro-commons";
 import { ImageDetails, IImage } from "../../types/custom";
 import { ImageModel } from "../../models/imagesModel";
 import { IMAGES_STATUS } from "../../constants";
@@ -17,6 +17,12 @@ export const imagesService = {
   },
   getImageById: async (imageId: string): Promise<IImage[]> => {
     try {
+      const key = `IMAGE|ID:${imageId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
       const images: IImage[] =
         await mongoUtils.findDocumentsWithOptions<IImage>(
           ImageModel,
@@ -33,6 +39,7 @@ export const imagesService = {
           },
           {}
         );
+      redisUtils.setKey(key, JSON.stringify(images), CACHE_TTL.ONE_DAY);
       return images;
     } catch (error) {
       loggerUtils.error(
@@ -81,6 +88,12 @@ export const imagesService = {
   },
   listImages: async (clientId: string): Promise<IImage[]> => {
     try {
+      const key = `IMAGES|CLIENT:${clientId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
       const images: IImage[] =
         await mongoUtils.findDocumentsWithOptions<IImage>(
           ImageModel,
@@ -98,6 +111,7 @@ export const imagesService = {
           },
           {}
         );
+      redisUtils.setKey(key, JSON.stringify(images), CACHE_TTL.ONE_DAY);
       return images;
     } catch (error) {
       loggerUtils.error(`imagesService :: listImages :: ${error}`);
@@ -125,6 +139,8 @@ export const imagesService = {
           isActive: imageDetails.isActive != undefined ? imageDetails.isActive : IMAGES_STATUS.ACTIVE,
         }
       );
+      redisUtils.delKey(`IMAGE|ID:${imageDetails.imageId}`);
+      redisUtils.delKey(`IMAGE|CLIENT:${imageDetails.clientId}`);
     } catch (error) {
       loggerUtils.error(
         `imagesService :: updateImageById :: image Id ${imageDetails.imageId} :: ${error}`
@@ -132,7 +148,7 @@ export const imagesService = {
       throw error;
     }
   },
-  deleteImageById: async (imageId: string) => {
+  deleteImageById: async (imageId: string, clientId: string) => {
     try {
       await mongoUtils.updateDocuments<IImage>(
         ImageModel,
@@ -143,9 +159,11 @@ export const imagesService = {
           isActive: IMAGES_STATUS.INACTIVE,
         }
       );
+      redisUtils.delKey(`IMAGE|ID:${imageId}`);
+      redisUtils.delKey(`IMAGE|CLIENT:${clientId}`);
     } catch (error) {
       loggerUtils.error(
-        `imagesService :: deleteImageById :: image Id ${imageId} :: ${error}`
+        `imagesService :: deleteImageById :: imageId ${imageId} :: clientId ${clientId}  :: ${error}`
       );
       throw error;
     }
