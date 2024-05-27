@@ -1,0 +1,8 @@
+.cursor-overlay {
+    position: absolute;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 10px;
+    height: 4px;
+}

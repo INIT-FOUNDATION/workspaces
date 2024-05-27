@@ -1,8 +1,8 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import socketIOClient from "socket.io-client";
 import { workspacesWebsocketBaseUrl } from "../../utils/config";
-import Cursor from "./Cursor/Cursor";
 import useMousePosition from "../../hooks/MousePosition";
+import Cursor from "../../shared/Cursor/Cursor";
 
 interface CursorProps {
   participantId: string | null;

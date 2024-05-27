@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import Workspaces from "./components/Workspaces/Workspaces";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import Loader from "./shared/Loader/Loader";
 
 const App: React.FC = () => {
   return (
@@ -19,6 +20,7 @@ const App: React.FC = () => {
         pauseOnHover
         theme="colored"
       />
+      <Loader/>
       <Routes>
         <Route path="/:token" element={<Workspaces />} />
       </Routes>

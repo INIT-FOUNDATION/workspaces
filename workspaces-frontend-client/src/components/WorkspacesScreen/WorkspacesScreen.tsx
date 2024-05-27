@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useLoader } from "../../contexts/LoaderContext";
 
 interface WorkspacesScreenProps {
   sessionId: string;
@@ -17,7 +18,11 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   agentSSLEnabled,
   access
 }) => {
+  const { showLoader, hideLoader } = useLoader();
+  
   useEffect(() => {
+    showLoader();
+
     const scheme = agentSSLEnabled ? "https" : "http";
     const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=admin&pwd=admin`;
     const iframe = document.createElement("iframe");
@@ -43,6 +48,10 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
 
     container.appendChild(iframe);
     document.body.appendChild(container);
+
+    iframe.onload = () => {
+      hideLoader();
+    };
 
     return () => {
       document.body.removeChild(container);
