@@ -81,7 +81,7 @@ const Workspaces: React.FC = () => {
 
   return (
     <>
-      {sessionStatus && access && (
+      {sessionStatus != 0 && access && (
         <>
           <WorkspacesScreen
             sessionId={sessionId}
