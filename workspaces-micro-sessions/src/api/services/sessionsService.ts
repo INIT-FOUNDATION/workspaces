@@ -125,7 +125,6 @@ export const sessionService = {
       const agent: IAgent = agents[0];
       sessionDetails.agentId = agent.agentId;
 
-
       const existingSessionsData: ISession[] = await sessionService.getSessionById(sessionDetails.sessionId);
       const existingSessionData: ISession = existingSessionsData[0];
 
@@ -202,7 +201,7 @@ export const sessionService = {
           SessionModel,
           {
             sessionId,
-            status: SESSIONS_STATUS.ACTIVE,
+            status: { $ne: SESSIONS_STATUS.DELETED },
           },
           {
             _id: 0,
