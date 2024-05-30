@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import socketIOClient, { Socket } from "socket.io-client";
-import { workspacesWebsocketBaseUrl } from "../../utils/config";
 import Cursors from "../Cursors/Cursors";
 import WorkspacesScreen from "../WorkspacesScreen/WorkspacesScreen";
 import { decodeJWTToken } from "../../utils/jwtUtils";
 import { useParams } from "react-router-dom";
 import { SESSIONS_STATUS } from "../../constants/commonConstants";
 import toastUtils from "../../utils/toastUtils";
+import { useSocket } from "../../contexts/SocketContext";
 
 interface SessionAccess {
   session_status: number;
@@ -15,6 +14,7 @@ interface SessionAccess {
 
 const Workspaces: React.FC = () => {
   const { token } = useParams();
+  const socket = useSocket();
   const [sessionId, setSessionId] = useState<string>("");
   const [participantId, setParticipantId] = useState<string>("");
   const [participantName, setParticipantName] = useState<string>("");
@@ -53,12 +53,10 @@ const Workspaces: React.FC = () => {
     } else {
       console.error("Workspaces :: Workspaces Token not found");
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
-    if (!sessionId || !participantId || !participantName) return;
-
-    const socket: Socket = socketIOClient(workspacesWebsocketBaseUrl);
+    if (!sessionId || !participantId || !participantName || !socket) return;
 
     socket.emit("workspaces_access", sessionId, participantId);
 
@@ -75,9 +73,9 @@ const Workspaces: React.FC = () => {
     });
 
     return () => {
-      socket.disconnect();
+      socket.off("workspaces_access");
     };
-  }, [sessionId, participantId, participantName]);
+  }, [sessionId, participantId, participantName, socket]);
 
   return (
     <>

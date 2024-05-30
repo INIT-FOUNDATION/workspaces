@@ -4,15 +4,18 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, BrowserRouter as Router } from "react-router-dom";
 import { LoaderProvider } from "./contexts/LoaderContext";
+import { SocketProvider } from "./contexts/SocketContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <LoaderProvider>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <SocketProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </SocketProvider>
   </LoaderProvider>
 );
 

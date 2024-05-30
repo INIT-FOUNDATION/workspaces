@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import socketIOClient from "socket.io-client";
-import { workspacesWebsocketBaseUrl } from "../../utils/config";
 import useMousePosition from "../../hooks/MousePosition";
 import Cursor from "../../shared/Cursor/Cursor";
+import { useSocket } from "../../contexts/SocketContext";
 
 interface CursorProps {
   participantId: string | null;
@@ -17,24 +16,27 @@ const Cursors: React.FC<CursorProps> = ({
   participantName,
   cursorColor,
 }) => {
+  const socket = useSocket();
   const [cursors, setCursors] = useState<any[]>([]);
-  const [socket, setSocket] = useState<any>(null);
   const { x, y } = useMousePosition();
 
   useEffect(() => {
-    const newSocket = socketIOClient(workspacesWebsocketBaseUrl);
-    setSocket(newSocket);
+    if (!socket) return;
 
-    newSocket.on("workspaces_cursors", (data: any) => {
+    socket.on("workspaces_cursors", (data: any) => {
       const parsedCursors = JSON.parse(data);
-      parsedCursors.cursors = parsedCursors.cursors.length > 0 && parsedCursors.cursors.filter((cursor: any) => JSON.parse(cursor).participantId !== participantId)
+      parsedCursors.cursors =
+        parsedCursors.cursors.length > 0 &&
+        parsedCursors.cursors.filter(
+          (cursor: any) => JSON.parse(cursor).participantId !== participantId
+        );
       setCursors(parsedCursors.cursors);
     });
 
     return () => {
-      newSocket.disconnect();
+      socket.off("workspaces_cursors");
     };
-  }, []);
+  }, [socket, participantId]);
 
   useEffect(() => {
     if (!socket || x === null || y === null) return;
@@ -58,20 +60,20 @@ const Cursors: React.FC<CursorProps> = ({
       adjustedX,
       adjustedY
     );
-
   }, [socket, x, y]);
 
   return (
-    <div style={{ position: "absolute", top: 0, left: 0, zIndex: "10" }}>
-      {cursors.length > 0 && cursors.map((cursor, cursorIndex) => (
-        <Cursor
-          key={cursorIndex}
-          x={JSON.parse(cursor).xCoordinate}
-          y={JSON.parse(cursor).yCoordinate}
-          label={JSON.parse(cursor).participantName}
-          color={cursorColor}
-        />
-      ))}
+    <div style={{ position: "absolute", top: 0, left: 0, zIndex: 10 }}>
+      {cursors.length > 0 &&
+        cursors.map((cursor, cursorIndex) => (
+          <Cursor
+            key={cursorIndex}
+            x={JSON.parse(cursor).xCoordinate}
+            y={JSON.parse(cursor).yCoordinate}
+            label={JSON.parse(cursor).participantName}
+            color={cursorColor}
+          />
+        ))}
     </div>
   );
 };

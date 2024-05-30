@@ -49,14 +49,26 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     container.appendChild(iframe);
     document.body.appendChild(container);
 
-    iframe.onload = () => {
+    const handleLoad = () => {
       hideLoader();
     };
 
+    const handleError = () => {
+      console.log("Errors")
+      iframe.src = url;
+    };
+
+    iframe.addEventListener("load", handleLoad);
+    iframe.addEventListener("error", handleError);
+
     return () => {
+      iframe.removeEventListener("load", handleLoad);
+      iframe.removeEventListener("error", handleError);
       document.body.removeChild(container);
     };
-  }, [access]);
+  }, [
+    access
+  ]);
 
   return null;
 };
