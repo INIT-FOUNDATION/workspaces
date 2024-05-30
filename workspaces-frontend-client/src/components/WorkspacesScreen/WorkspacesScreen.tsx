@@ -54,7 +54,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     };
 
     const handleError = () => {
-      console.log("Errors")
+      console.log("WorkspacesScreen :: handleError")
       iframe.src = url;
     };
 
