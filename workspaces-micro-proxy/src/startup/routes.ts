@@ -99,7 +99,8 @@ export default function (app: Express): void {
         participantId = sessionData.participantId;
       }
       return path.replace(`/api/v1/proxy/${sessionId}/${participantId}`, '');
-    }
+    },
+    logger: loggerUtils
   }
 
   app.use("/api/v1/proxy/:sessionId/:participantId", proxyMiddleware, createProxyMiddleware<Request, Response>(proxyOptions))
