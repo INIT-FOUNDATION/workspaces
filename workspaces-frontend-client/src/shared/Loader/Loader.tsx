@@ -4,7 +4,6 @@ import './Loader.css';
 
 const Loader: React.FC = () => {
     const { isLoading } = useLoader();
-    console.log("isLoading", isLoading)
     if (!isLoading) return null;
 
     return (
