@@ -2,10 +2,13 @@
 import express from "express";
 import { sessionsController } from "../controllers/sessionsController";
 import { clientMiddleware } from "../middleware/clientMiddleware";
+import { sessionsMiddleware } from "../middleware/sessionsMiddleware";
 
 const sessionsRouter = express.Router();
 
 sessionsRouter.get("/health", sessionsController.healthCheck);
+
+sessionsRouter.get("/proxyDetails", sessionsMiddleware);
 
 sessionsRouter.post("/create", clientMiddleware, sessionsController.createSession);
 
