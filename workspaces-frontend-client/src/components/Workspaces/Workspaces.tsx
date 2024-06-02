@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Cursors from "../Cursors/Cursors";
 import WorkspacesScreen from "../WorkspacesScreen/WorkspacesScreen";
-import { decodeJWTToken } from "../../utils/jwtUtils";
 import { useParams } from "react-router-dom";
 import { SESSIONS_STATUS } from "../../constants/commonConstants";
 import toastUtils from "../../utils/toastUtils";
 import { useSocket } from "../../contexts/SocketContext";
+import SessionsService from "../../services/SessionsService";
+import { useLoader } from "../../contexts/LoaderContext";
 
 interface SessionAccess {
   session_status: number;
@@ -24,6 +25,7 @@ const Workspaces: React.FC = () => {
   const [drawCursors, setDrawCursors] = useState<boolean>(false);
   const [sessionStatus, setSessionStatus] = useState<number>(0);
   const [access, setAccess] = useState<string>("");
+  const { showLoader, hideLoader } = useLoader();
 
   const randomColor = () => {
     const letters = "0123456789ABCDEF";
@@ -38,18 +40,24 @@ const Workspaces: React.FC = () => {
 
   useEffect(() => {
     if (token) {
-      const decodedToken = decodeJWTToken(token);
-      if (decodedToken !== null) {
-        setSessionId(decodedToken.sessionId);
-        setParticipantId(decodedToken.participantId);
-        setParticipantName(decodedToken.participantName);
-        setAgentHost(decodedToken.agentHost);
-        setAgentPort(decodedToken.agentPort);
-        setAgentSSLEnabled(decodedToken.sslEnabled);
-        setDrawCursors(decodedToken.drawCursors);
-      } else {
-        console.error("Workspaces :: Invalid Workspaces Token");
-      }
+      (async () => {
+        try {
+          showLoader();
+          const response = await SessionsService.getProxyDetails(token);
+          hideLoader();
+          if (response.data && response.data.data) {
+            setSessionId(response.data.data.sessionId);
+            setParticipantId(response.data.data.participantId);
+            setParticipantName(response.data.data.participantName);
+            setAgentHost(response.data.data.agentHost);
+            setAgentPort(response.data.data.agentPort);
+            setAgentSSLEnabled(response.data.data.sslEnabled);
+            setDrawCursors(response.data.data.drawCursors);
+          }
+        } catch (error) {
+          console.error("Workspaces :: Error fetching proxy details :: ", error);
+        }
+      })();
     } else {
       console.error("Workspaces :: Workspaces Token not found");
     }
