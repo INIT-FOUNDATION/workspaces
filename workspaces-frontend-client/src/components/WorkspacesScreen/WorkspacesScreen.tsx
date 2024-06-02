@@ -27,6 +27,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     const rand = Math.floor((Math.random()*1000000)+1);
     const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=admin&pwd=admin&uid=${rand}`;
     const iframe = document.createElement("iframe");
+    
     iframe.src = url;
     iframe.style.position = "absolute";
     iframe.style.width = "100%";
@@ -40,6 +41,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     iframe.style.border = "none"; 
     
     const container = document.createElement("div");
+    
     container.style.position = "fixed";
     container.style.top = "0";
     container.style.left = "0";
