@@ -24,7 +24,8 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     showLoader();
 
     const scheme = agentSSLEnabled ? "https" : "http";
-    const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=admin&pwd=admin`;
+    const rand = Math.floor((Math.random()*1000000)+1);
+    const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=admin&pwd=admin&uid=${rand}`;
     const iframe = document.createElement("iframe");
     iframe.src = url;
     iframe.style.position = "absolute";
