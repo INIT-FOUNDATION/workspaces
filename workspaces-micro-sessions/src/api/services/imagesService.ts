@@ -140,7 +140,7 @@ export const imagesService = {
         }
       );
       redisUtils.delKey(`IMAGE|ID:${imageDetails.imageId}`);
-      redisUtils.delKey(`IMAGE|CLIENT:${imageDetails.clientId}`);
+      redisUtils.delKey(`IMAGES|CLIENT:${imageDetails.clientId}`);
     } catch (error) {
       loggerUtils.error(
         `imagesService :: updateImageById :: image Id ${imageDetails.imageId} :: ${error}`
