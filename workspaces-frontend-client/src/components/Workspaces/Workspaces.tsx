@@ -7,6 +7,7 @@ import toastUtils from "../../utils/toastUtils";
 import { useSocket } from "../../contexts/SocketContext";
 import SessionsService from "../../services/SessionsService";
 import { useLoader } from "../../contexts/LoaderContext";
+import { workspacesWebsocketBaseUrl } from "../../utils/config";
 
 interface SessionAccess {
   session_status: number;
@@ -15,7 +16,7 @@ interface SessionAccess {
 
 const Workspaces: React.FC = () => {
   const { token } = useParams();
-  const socket = useSocket();
+  const socket = useSocket(workspacesWebsocketBaseUrl);
   const [sessionId, setSessionId] = useState<string>("");
   const [participantId, setParticipantId] = useState<string>("");
   const [participantName, setParticipantName] = useState<string>("");

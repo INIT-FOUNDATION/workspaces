@@ -1,11 +1,31 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import socketIOClient from 'socket.io-client';
-import { workspacesWebsocketBaseUrl } from '../utils/config';
 
 const SocketContext = createContext<any>(null);
 
-export const useSocket = () => {
-  return useContext(SocketContext);
+export const useSocket = (socketUrl: string) => {
+  const [socket, setSocket] = useState<any>(null);
+
+  useEffect(() => {
+    const newSocket = socketIOClient(socketUrl);
+
+    const handleReconnect = () => {
+      if (!newSocket.connected) {
+        newSocket.open();
+      }
+    };
+
+    newSocket.on('reconnect_attempt', handleReconnect);
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+      newSocket.off('reconnect_attempt', handleReconnect);
+    };
+  }, [socketUrl]);
+
+  return socket;
 };
 
 interface SocketProviderProps {
@@ -13,19 +33,8 @@ interface SocketProviderProps {
 }
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
-  const [socket, setSocket] = useState<any>(null);
-
-  useEffect(() => {
-    const newSocket = socketIOClient(workspacesWebsocketBaseUrl);
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
-
   return (
-    <SocketContext.Provider value={socket}>
+    <SocketContext.Provider value={useSocket}>
       {children}
     </SocketContext.Provider>
   );

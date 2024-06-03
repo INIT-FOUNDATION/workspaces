@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import useMousePosition from "../../hooks/MousePosition";
 import Cursor from "../../shared/Cursor/Cursor";
 import { useSocket } from "../../contexts/SocketContext";
+import { workspacesWebsocketBaseUrl } from "../../utils/config";
 
 interface CursorProps {
   participantId: string | null;
@@ -16,7 +17,7 @@ const Cursors: React.FC<CursorProps> = ({
   participantName,
   cursorColor,
 }) => {
-  const socket = useSocket();
+  const socket = useSocket(workspacesWebsocketBaseUrl);
   const [cursors, setCursors] = useState<any[]>([]);
   const { x, y } = useMousePosition();
 
