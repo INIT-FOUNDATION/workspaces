@@ -31,9 +31,6 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       return `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=${userName}&pwd=${password}&uid=${rand}`;
     };
 
-    const websocketUrl = `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/ws?password=${password}`;
-    const websocketClient = new WebSocket(websocketUrl);
-
     const iframe = document.createElement("iframe");
 
     iframe.src = createIframeUrl();
@@ -69,9 +66,6 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
 
     iframe.addEventListener("load", handleLoad);
     iframe.addEventListener("error", handleError);
-    websocketClient.addEventListener("close", handleWebSocketClose);
-    websocketClient.addEventListener("errror", handleWebSocketError);
-
 
     const container = document.createElement("div");
 
@@ -89,8 +83,6 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     return () => {
       iframe.removeEventListener("load", handleLoad);
       iframe.removeEventListener("error", handleError);
-      websocketClient.removeEventListener("close", handleWebSocketClose);
-      websocketClient.removeEventListener("error", handleWebSocketError);
       document.body.removeChild(container);
     };
   }, [access]);
