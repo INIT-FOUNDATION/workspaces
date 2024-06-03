@@ -62,9 +62,16 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       iframe.src = createIframeUrl();
     };
 
+    const handleWebSocketError = () => {
+      console.log("WorkspacesScreen :: WebSocket Error :: Reloading iframe...");
+      iframe.src = createIframeUrl();
+    };
+
     iframe.addEventListener("load", handleLoad);
     iframe.addEventListener("error", handleError);
     websocketClient.addEventListener("close", handleWebSocketClose);
+    websocketClient.addEventListener("errror", handleWebSocketError);
+
 
     const container = document.createElement("div");
 
@@ -83,6 +90,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       iframe.removeEventListener("load", handleLoad);
       iframe.removeEventListener("error", handleError);
       websocketClient.removeEventListener("close", handleWebSocketClose);
+      websocketClient.removeEventListener("error", handleWebSocketError);
       document.body.removeChild(container);
     };
   }, [access]);
