@@ -24,11 +24,16 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     showLoader();
 
     const scheme = agentSSLEnabled ? "https" : "http";
-    const rand = Math.floor((Math.random()*1000000)+1);
-    const url = `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=admin&pwd=admin&uid=${rand}`;
+    const createIframeUrl = () => {
+      const rand = Math.floor((Math.random() * 1000000) + 1);
+      return `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=admin&pwd=admin&uid=${rand}`;
+    };
+
+    const url = createIframeUrl();
     const iframe = document.createElement("iframe");
-    
+
     iframe.src = url;
+    iframe.contentWindow?.document.location.reload();
     iframe.style.position = "absolute";
     iframe.style.width = "100%";
     iframe.style.height = "100%";
@@ -38,10 +43,16 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     iframe.style.bottom = "0";
     iframe.style.overflow = "hidden";
     iframe.style.pointerEvents = access === "read" ? "none" : "auto";
-    iframe.style.border = "none"; 
-    
+    iframe.style.border = "none";
+    iframe.onload = function() {
+      handleLoad()
+    } 
+    iframe.onerror = function () {
+      handleError()
+    }
+
     const container = document.createElement("div");
-    
+
     container.style.position = "fixed";
     container.style.top = "0";
     container.style.left = "0";
@@ -50,28 +61,26 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     container.style.overflow = "hidden";
 
     container.appendChild(iframe);
+
     document.body.appendChild(container);
 
     const handleLoad = () => {
       hideLoader();
+      iframe.contentWindow?.document.location.reload()
     };
 
     const handleError = () => {
-      console.log("WorkspacesScreen :: handleError")
-      iframe.src = url;
+      console.log("WorkspacesScreen :: handleError");
+      iframe.contentWindow?.document.location.reload()
     };
-
-    iframe.addEventListener("load", handleLoad);
-    iframe.addEventListener("error", handleError);
 
     return () => {
       iframe.removeEventListener("load", handleLoad);
       iframe.removeEventListener("error", handleError);
       document.body.removeChild(container);
+      iframe.remove();
     };
-  }, [
-    access
-  ]);
+  }, [access]);
 
   return null;
 };
