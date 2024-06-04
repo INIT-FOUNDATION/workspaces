@@ -54,16 +54,6 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       iframe.src = createIframeUrl();
     };
 
-    const handleWebSocketClose = () => {
-      console.log("WorkspacesScreen :: WebSocket disconnected. Reloading iframe...");
-      iframe.src = createIframeUrl();
-    };
-
-    const handleWebSocketError = () => {
-      console.log("WorkspacesScreen :: WebSocket Error :: Reloading iframe...");
-      iframe.src = createIframeUrl();
-    };
-
     iframe.addEventListener("load", handleLoad);
     iframe.addEventListener("error", handleError);
 
