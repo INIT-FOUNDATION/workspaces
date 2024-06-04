@@ -151,21 +151,8 @@ export const sessionService = {
       const existingSessionsData: ISession[] = await sessionService.getSessionById(sessionDetails.sessionId);
       const existingSessionData: ISession = existingSessionsData[0];
 
-      if (envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development")) {
-        const images = await imagesService.getImageById(existingSessionData.imageId);
-        const image = images[0];
-
-        const availablePorts = await sessionService.getAvailableTCPUDPPorts(image.imageId, image.tcpPortRange, image.udpPortRange);
-        if (availablePorts.tcpPort === 0 || availablePorts.udpPort === 0) {
-          loggerUtils.error(
-            `sessionService :: createSession :: no ports are available to create session`
-          );
-          throw Error;
-        }
-
-        sessionDetails.tcpPort = availablePorts.tcpPort;
-        sessionDetails.udpPort = availablePorts.udpPort;
-      }
+      sessionDetails.tcpPort = existingSessionData.tcpPort;
+      sessionDetails.udpPort = existingSessionData.udpPort;
 
       sessionDetails.imageId = existingSessionData.imageId;
       sessionDetails.adminPassword = existingSessionData.adminPassword;
