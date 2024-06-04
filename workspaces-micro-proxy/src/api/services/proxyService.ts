@@ -27,7 +27,14 @@ export const proxyService = {
 
         await proxyService.ensureNetworkExists(networkName);
 
-        const defaultEnvs = [`NEKO_PASSWORD=${proxyDetails.userPassword}`, `NEKO_PASSWORD_ADMIN=${proxyDetails.adminPassword}`, `START_URL=${proxyDetails.startUrl}`, `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`]
+        const defaultEnvs = [
+          `NEKO_PASSWORD=${proxyDetails.userPassword}`,
+          `NEKO_PASSWORD_ADMIN=${proxyDetails.adminPassword}`,
+          `START_URL=${proxyDetails.startUrl}`,
+          `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`,
+          `NEKO_CERT=${envUtils.getStringEnvVariableOrDefault("WORKSPACES_SESSIONS_SSL_CERT_PATH", "/usr/src/app/certs/fullchain.pem")}`,
+          `NEKO_KEY=${envUtils.getStringEnvVariableOrDefault("WORKSPACES_SESSIONS_SSL_KEY_PATH", "/usr/src/app/certs/privkey.pem")}`
+        ]
 
         if (environment === "Development" && proxyDetails.tcpPort && proxyDetails.udpPort) {
           defaultEnvs.push(`NEKO_BIND=:${proxyDetails.tcpPort}`, `NEKO_UDPMUX=${proxyDetails.udpPort}`);
@@ -55,7 +62,7 @@ export const proxyService = {
 
           createOptions.ExposedPorts[`${proxyDetails.tcpPort}/tcp`] = {}
           createOptions.ExposedPorts[`${proxyDetails.udpPort}/udp`] = {}
-        }        
+        }
 
         if (proxyDetails.saveSession && image.volumeMountPath)
           createOptions.HostConfig?.Mounts?.push({
@@ -89,7 +96,7 @@ export const proxyService = {
             userPassword: proxyDetails.userPassword,
             environmentVariablesUsed: createOptions.Env
           };
-          
+
           await mongoUtils.insertDocument<ISession>(SessionModel, sessionObj);
         }
       }
@@ -411,7 +418,7 @@ export const proxyService = {
     try {
       const key = `SESSION_IMAGE|${sessionId}`;
       const cachedData: any = await nodeCacheUtils.getKey(key);
-      
+
       if (cachedData) return cachedData;
 
       const pipeline = [

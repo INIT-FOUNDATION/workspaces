@@ -129,10 +129,12 @@ services:
       - WORKSPACES_MONGODB_USERNAME=mongo
       - WORKSPACES_MONGODB_PASSWORD=419CVN8z592e
       - WORKSPACES_NODE_CACHE_KEYS_PREFIX=WORKSPACES|
-      - NODE_ENV=Production
       - WORKSPACES_CLIENT_BASE_URL=https://workspaces.orrizonte.in
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/letsencrypt/live/$DOMAIN/fullchain.pem:/usr/src/app/certs/fullchain.pem
+      - /etc/letsencrypt/live/$DOMAIN/privkey.pem:/usr/src/app/certs/privkey.pem
+
 
   haproxy:
     image: haproxy:latest
