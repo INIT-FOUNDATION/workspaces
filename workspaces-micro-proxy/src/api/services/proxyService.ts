@@ -57,8 +57,8 @@ export const proxyService = {
         if (envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_SSL_ENABLED", false)) {
           const agentSSLCertPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_CERT_PATH", "/etc/letsencrypt/live/example.com/fullchain.pem")
           const agentSSLKeyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_KEY_PATH", "/etc/letsencrypt/live/example.com/privkey.pem")
-          const proxySSLCertPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_KEY_PATH", "/app/fullchain.pem")
-          const proxySSLKeyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_KEY_PATH", "/app/privkey.pem")
+          const proxySSLCertPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_SSL_KEY_PATH", "/app/fullchain.pem")
+          const proxySSLKeyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_SSL_KEY_PATH", "/app/privkey.pem")
 
           if (createOptions.Env && createOptions.Env.length > 0) {
             createOptions.Env.push(
