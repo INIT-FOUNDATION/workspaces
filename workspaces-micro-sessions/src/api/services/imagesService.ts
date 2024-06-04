@@ -8,6 +8,7 @@ export const imagesService = {
     try {
       const imageObj: Partial<IImage> = imageDetails;
       await mongoUtils.insertDocument<IImage>(ImageModel, imageObj);
+      redisUtils.delKey(`IMAGES|CLIENT:${imageDetails.clientId}`);
     } catch (error) {
       loggerUtils.error(
         `imagesService :: createImage :: imageObj ${imageDetails} :: ${error}`
@@ -161,7 +162,7 @@ export const imagesService = {
         }
       );
       redisUtils.delKey(`IMAGE|ID:${imageId}`);
-      redisUtils.delKey(`IMAGE|CLIENT:${clientId}`);
+      redisUtils.delKey(`IMAGES|CLIENT:${clientId}`);
     } catch (error) {
       loggerUtils.error(
         `imagesService :: deleteImageById :: imageId ${imageId} :: clientId ${clientId}  :: ${error}`

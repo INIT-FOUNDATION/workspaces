@@ -35,6 +35,7 @@ export const proxyService = {
 
         const createOptions: ContainerCreateOptions = {
           name: proxyDetails.sessionId,
+          ExposedPorts: {},
           HostConfig: {
             CapAdd: ['SYS_ADMIN'],
             PortBindings: {},
@@ -48,9 +49,12 @@ export const proxyService = {
           Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
-        if (environment === "Development" && createOptions.HostConfig && proxyDetails.tcpPort && proxyDetails.udpPort) {
+        if (environment === "Development" && createOptions.ExposedPorts && createOptions.HostConfig && proxyDetails.tcpPort && proxyDetails.udpPort) {
           createOptions.HostConfig.PortBindings[`${proxyDetails.tcpPort}/tcp`] = [{ HostPort: `${proxyDetails.tcpPort}` }];
           createOptions.HostConfig.PortBindings[`${proxyDetails.udpPort}/udp`] = [{ HostPort: `${proxyDetails.udpPort}` }];
+
+          createOptions.ExposedPorts[`${proxyDetails.tcpPort}/tcp`] = {}
+          createOptions.ExposedPorts[`${proxyDetails.udpPort}/udp`] = {}
         }        
 
         if (proxyDetails.saveSession && image.volumeMountPath)

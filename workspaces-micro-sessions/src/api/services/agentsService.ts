@@ -25,6 +25,7 @@ export const agentsService = {
     try {
       const agentObj: Partial<IAgent> = agentDetails;
       await mongoUtils.insertDocument<IAgent>(AgentModel, agentObj);
+      redisUtils.delKey(`AGENTS|CLIENT:${agentDetails.clientId}`);
     } catch (error) {
       loggerUtils.error(
         `agentsService :: createAgent :: agentObj ${agentDetails} :: ${error}`
