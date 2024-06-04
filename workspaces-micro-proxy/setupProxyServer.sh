@@ -130,11 +130,11 @@ services:
       - WORKSPACES_MONGODB_PASSWORD=419CVN8z592e
       - WORKSPACES_NODE_CACHE_KEYS_PREFIX=WORKSPACES|
       - WORKSPACES_CLIENT_BASE_URL=https://workspaces.orrizonte.in
+      - WORKSPACES_SESSIONS_SSL_ENABLED=true
+      - WORKSPACES_AGENT_SSL_CERT_PATH=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
+      - WORKSPACES_AGENT_SSL_KEY_PATH=/etc/letsencrypt/live/$DOMAIN/privkey.pem
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/letsencrypt/live/$DOMAIN/fullchain.pem:/usr/src/app/certs/fullchain.pem
-      - /etc/letsencrypt/live/$DOMAIN/privkey.pem:/usr/src/app/certs/privkey.pem
-
 
   haproxy:
     image: haproxy:latest

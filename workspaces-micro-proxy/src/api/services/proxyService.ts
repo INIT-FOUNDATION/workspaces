@@ -32,8 +32,6 @@ export const proxyService = {
           `NEKO_PASSWORD_ADMIN=${proxyDetails.adminPassword}`,
           `START_URL=${proxyDetails.startUrl}`,
           `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`,
-          `NEKO_CERT=${envUtils.getStringEnvVariableOrDefault("WORKSPACES_SESSIONS_SSL_CERT_PATH", "/usr/src/app/certs/fullchain.pem")}`,
-          `NEKO_KEY=${envUtils.getStringEnvVariableOrDefault("WORKSPACES_SESSIONS_SSL_KEY_PATH", "/usr/src/app/certs/privkey.pem")}`
         ]
 
         if (environment === "Development" && proxyDetails.tcpPort && proxyDetails.udpPort) {
@@ -56,6 +54,33 @@ export const proxyService = {
           Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
+        if (envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_SSL_ENABLED", false)) {
+          const agentSSLCertPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_CERT_PATH", "/etc/letsencrypt/live/example.com/fullchain.pem")
+          const agentSSLKeyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_KEY_PATH", "/etc/letsencrypt/live/example.com/privkey.pem")
+          const proxySSLCertPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_KEY_PATH", "/app/fullchain.pem")
+          const proxySSLKeyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_KEY_PATH", "/app/privkey.pem")
+
+          if (createOptions.Env && createOptions.Env.length > 0) {
+            createOptions.Env.push(
+              `NEKO_CERT=${proxySSLCertPath}`,
+              `NEKO_KEY=${proxySSLKeyPath}`
+            )
+          }
+
+          if (createOptions.HostConfig?.Mounts) {
+            createOptions.HostConfig?.Mounts?.push({
+              Type: "bind",
+              Source: agentSSLCertPath,
+              Target: proxySSLCertPath,
+            },
+              {
+                Type: "bind",
+                Source: agentSSLKeyPath,
+                Target: proxySSLKeyPath,
+              });
+          }
+        }
+
         if (environment === "Development" && createOptions.ExposedPorts && createOptions.HostConfig && proxyDetails.tcpPort && proxyDetails.udpPort) {
           createOptions.HostConfig.PortBindings[`${proxyDetails.tcpPort}/tcp`] = [{ HostPort: `${proxyDetails.tcpPort}` }];
           createOptions.HostConfig.PortBindings[`${proxyDetails.udpPort}/udp`] = [{ HostPort: `${proxyDetails.udpPort}` }];
@@ -64,12 +89,13 @@ export const proxyService = {
           createOptions.ExposedPorts[`${proxyDetails.udpPort}/udp`] = {}
         }
 
-        if (proxyDetails.saveSession && image.volumeMountPath)
+        if (proxyDetails.saveSession && image.volumeMountPath) {
           createOptions.HostConfig?.Mounts?.push({
             Type: "volume",
             Source: proxyDetails.sessionId,
             Target: image.volumeMountPath,
           });
+        }
 
         const container = await docker.createContainer(createOptions);
         await container.start();
