@@ -1,4 +1,4 @@
-FROM ghcr.io/techknowkraftai/node:12.22 AS build
+FROM ghcr.io/techknowkraftai/node AS build
 ARG ENVIRONMENT=dev
 WORKDIR /app
 COPY package.json ./
