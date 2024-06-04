@@ -40,6 +40,8 @@ export interface IImage extends Document {
     sslEnabled: boolean;
     clientId: string;
     isActive: boolean;
+    tcpPortRange: string;
+    udpPortRange: string;
   }
 
   export interface IParticipant extends Document {

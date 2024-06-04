@@ -12,7 +12,9 @@ const AgentModel: Model<IAgent> =
       agentPort: { type: Number, required: true },
       sslEnabled: { type: Boolean, required: true },
       clientId: { type: String, required: true },
-      isActive: { type: Boolean, required: true }
+      isActive: { type: Boolean, required: true },
+      tcpPortRange: { type: String, required: true },
+      udpPortRange: { type: String, required: true }
     }, {
       timestamps: true,
     })
