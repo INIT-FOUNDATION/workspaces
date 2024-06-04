@@ -8,6 +8,8 @@ export interface IAgent extends Document {
   sslEnabled: boolean;
   clientId: string;
   isActive: boolean;
+  tcpPortRange: string;
+  udpPortRange: string;
 }
 
 export interface AgentDetails {
@@ -18,6 +20,8 @@ export interface AgentDetails {
   sslEnabled: boolean;
   clientId: string;
   isActive: boolean;
+  tcpPortRange: string;
+  udpPortRange: string;
 }
 
 export interface ISession extends Document {

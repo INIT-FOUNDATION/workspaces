@@ -4,7 +4,7 @@ import { IMAGES_STATUS, SESSIONS_STATUS } from "../../constants";
 import { ImageModel } from "../../models/imagesModel";
 import { ParticipantModel } from "../../models/participantsModel";
 import { SessionModel } from "../../models/sessionsModel";
-import Docker, { Container, ContainerCreateOptions } from "dockerode";
+import Docker, { ContainerCreateOptions } from "dockerode";
 
 const environment = envUtils.getStringEnvVariableOrDefault(
   "NODE_ENV",

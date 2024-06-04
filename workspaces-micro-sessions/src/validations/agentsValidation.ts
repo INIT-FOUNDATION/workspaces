@@ -10,7 +10,9 @@ export const validateAgents = (agentDetails: AgentDetails) => {
     agentPort: Joi.number().min(80).max(65535).required(),
     sslEnabled: Joi.boolean().required(),
     clientId: Joi.string().required(),
-    isActive: Joi.boolean().default(AGENTS_STATUS.ACTIVE).required()
+    isActive: Joi.boolean().default(AGENTS_STATUS.ACTIVE).required(),
+    tcpPortRange: Joi.string().required(),
+    udpPortRange: Joi.string().required()
   });
   return agentDetailsSchema.validate(agentDetails);
 };
@@ -23,7 +25,9 @@ export const validateUpdateAgents = (agentDetails: AgentDetails) => {
     agentPort: Joi.number().min(1025).max(65535),
     sslEnabled: Joi.boolean().default(true),
     clientId: Joi.string().required(),
-    isActive: Joi.boolean().default(AGENTS_STATUS.ACTIVE)
+    isActive: Joi.boolean().default(AGENTS_STATUS.ACTIVE),
+    tcpPortRange: Joi.string().allow("", null),
+    udpPortRange: Joi.string().allow("", null)
   });
   return agentDetailsSchema.validate(agentDetails);
 };
