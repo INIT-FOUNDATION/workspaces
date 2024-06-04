@@ -1,5 +1,6 @@
 import {
   CACHE_TTL,
+  envUtils,
   jwtUtils,
   loggerUtils,
   mongoUtils,
@@ -21,6 +22,7 @@ import { getStringEnvVariableOrDefault } from "workspaces-micro-commons/src/util
 import { SESSIONS_STATUS } from "../../constants";
 import { imagesService } from "./imagesService";
 import { proxyService } from "./proxyService";
+import crypto from "crypto";
 
 export const sessionService = {
   createSession: async (
@@ -65,6 +67,24 @@ export const sessionService = {
           sessionDetails.imageId = image.imageId;
 
           const availableAgent = availableAgents[0];
+
+          if (envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development")) {
+            const availablePorts = await sessionService.getAvailableTCPUDPPorts(image.imageId, image.tcpPortRange, image.udpPortRange);
+            if (availablePorts.tcpPort === 0 || availablePorts.udpPort === 0) {
+              loggerUtils.error(
+                `sessionService :: createSession :: no ports are available to create session`
+              );
+              throw Error;
+            }
+
+            sessionDetails.tcpPort = availablePorts.tcpPort;
+            sessionDetails.udpPort = availablePorts.udpPort;
+          }
+          
+          const credentials = sessionService.generateSessionCredentials(envUtils.getNumberEnvVariableOrDefault("WORKSPACES_SESSIONS_CREDENTIALS_DEFAULT_LENGTH", 50));
+          sessionDetails.adminPassword = credentials.adminPassword;
+          sessionDetails.userPassword = credentials.userPassword;
+
           sessionDetails.agentId = availableAgent.agentId;
 
           const baseUrl = `${availableAgent.sslEnabled ? "https" : "http"}://${availableAgent.agentHost
@@ -93,6 +113,9 @@ export const sessionService = {
             agentHost: availableAgent.agentHost,
             agentPort: availableAgent.agentPort,
             sslEnabled: availableAgent.sslEnabled,
+            tcpPort: sessionDetails.tcpPort,
+            sessionUserName: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? "admin" : "neko",
+            sessionPassword: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? sessionDetails.adminPassword : sessionDetails.userPassword
           };
 
           const jwt = jwtUtils.generateJwt(sessionResponse, CACHE_TTL.ONE_DAY);
@@ -128,7 +151,25 @@ export const sessionService = {
       const existingSessionsData: ISession[] = await sessionService.getSessionById(sessionDetails.sessionId);
       const existingSessionData: ISession = existingSessionsData[0];
 
+      if (envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development")) {
+        const images = await imagesService.getImageById(existingSessionData.imageId);
+        const image = images[0];
+
+        const availablePorts = await sessionService.getAvailableTCPUDPPorts(image.imageId, image.tcpPortRange, image.udpPortRange);
+        if (availablePorts.tcpPort === 0 || availablePorts.udpPort === 0) {
+          loggerUtils.error(
+            `sessionService :: createSession :: no ports are available to create session`
+          );
+          throw Error;
+        }
+
+        sessionDetails.tcpPort = availablePorts.tcpPort;
+        sessionDetails.udpPort = availablePorts.udpPort;
+      }
+
       sessionDetails.imageId = existingSessionData.imageId;
+      sessionDetails.adminPassword = existingSessionData.adminPassword;
+      sessionDetails.userPassword = existingSessionData.userPassword;
 
       const baseUrl = `${agent.sslEnabled ? "https" : "http"}://${agent.agentHost
         }:${agent.agentPort}/api/v1/proxy/create`;
@@ -150,12 +191,15 @@ export const sessionService = {
 
       const sessionResponse = {
         sessionId: sessionDetails.sessionId,
-        drawCursors: sessionDetails.drawCursors,
+        drawCursors: existingSessionData.drawCursors,
         participantId: participantObj.participantId,
         participantName: participantObj.participantName,
         agentHost: agent.agentHost,
         agentPort: agent.agentPort,
         sslEnabled: agent.sslEnabled,
+        tcpPort: existingSessionData.tcpPort,
+        sessionUserName: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? "admin" : "neko",
+        sessionPassword: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? existingSessionData.adminPassword : existingSessionData.userPassword
       };
 
       const jwt = jwtUtils.generateJwt(sessionResponse, CACHE_TTL.ONE_DAY);
@@ -374,6 +418,62 @@ export const sessionService = {
     } catch (error) {
       loggerUtils.error(
         `sessionsService :: getParticipantsCountByClientId :: sessionId ${sessionId} :: ${error}`
+      );
+      throw error;
+    }
+  },
+  getAvailableTCPUDPPorts: async (
+    imageId: string,
+    tcpPortRange: string,
+    udpPortRange: string
+  ): Promise<{ tcpPort: number, udpPort: number }> => {
+    try {
+      const [tcpStartPort, tcpEndPort] = tcpPortRange.split("-").map(Number);
+      const [udpStartPort, udpEndPort] = udpPortRange.split("-").map(Number);
+  
+      const sessions: ISession[] = await mongoUtils.findDocumentsWithOptions(
+        SessionModel,
+        { imageId, status: SESSIONS_STATUS.ACTIVE },
+        { _id: 0, tcpPort: 1, udpPort: 1 },
+        {}
+      );
+  
+      const existingTCPPorts = new Set(sessions.map(session => session.tcpPort));
+      const existingUDPPorts = new Set(sessions.map(session => session.udpPort));
+  
+      const generateRandomPort = (startPort: number, endPort: number, existingPorts: Set<number>): number => {
+        const availablePorts: number[] = [];
+        for (let port = startPort; port <= endPort; port++) {
+          if (!existingPorts.has(port)) {
+            availablePorts.push(port);
+          }
+        }
+        if (availablePorts.length === 0) {
+          throw new Error("No available ports in the specified range.");
+        }
+        return availablePorts[Math.floor(Math.random() * availablePorts.length)];
+      };
+  
+      return {
+        tcpPort: generateRandomPort(tcpStartPort, tcpEndPort, existingTCPPorts),
+        udpPort: generateRandomPort(udpStartPort, udpEndPort, existingUDPPorts)
+      };
+    } catch (error) {
+      loggerUtils.error(
+        `sessionsService :: getAvailableTCPUDPPorts :: tcpPortRange ${tcpPortRange} :: udpPortRange :: ${udpPortRange} :: ${error}`
+      );
+      throw error;
+    }
+  },
+  generateSessionCredentials: (length: number): { adminPassword: string, userPassword: string } => {
+    try {
+      return { 
+        adminPassword: crypto.randomBytes(50).toString('hex').slice(0, length), 
+        userPassword: crypto.randomBytes(50).toString('hex').slice(0, length) 
+      }
+    } catch (error) {
+      loggerUtils.error(
+        `sessionsService :: generateSessionCredentials :: ${error}`
       );
       throw error;
     }

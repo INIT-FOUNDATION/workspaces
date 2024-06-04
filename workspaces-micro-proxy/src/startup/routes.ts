@@ -11,7 +11,7 @@ import {
 } from "workspaces-micro-commons";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { proxyMiddleware } from "../api/middleware/proxyMiddleware";
-import { IImage } from "../types/custom";
+import { IImage, ISession } from "../types/custom";
 import { proxyService } from "../api/services/proxyService";
 
 export default function (app: Express): void {
@@ -52,7 +52,6 @@ export default function (app: Express): void {
   const router = async (req: Request) => {
     try {
       const defaultProxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080)
-      const defaultProxyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_PATH", "")
       const environment = envUtils.getStringEnvVariableOrDefault(
         "NODE_ENV",
         "Development"
@@ -60,20 +59,18 @@ export default function (app: Express): void {
 
       if (req && req.params) {
         const { sessionId, participantId } = req.params;
-        const image: IImage = await proxyService.getImageDetailsBySessionId(sessionId);
-        const primaryPortDetails = image.runningPorts.find(runningPort => runningPort.primary);
-        const proxyPort = primaryPortDetails?.port || defaultProxyPort;
-        const proxyPath = image.proxyUrlPath || defaultProxyPath;
+        const sessionsDetails: ISession[] = await proxyService.getSessionById(sessionId);
+        const sessionDetails = sessionsDetails[0];
+        const proxyPort = sessionDetails.tcpPort || defaultProxyPort;
         nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId, participantId }, CACHE_TTL.ONE_HOUR);
-        return `http://${environment === "Development" ? "localhost" : sessionId}:${proxyPort}${proxyPath}`
+        return `http://${environment === "Development" ? "localhost" : sessionId}:${proxyPort}`
       } else {
         const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
         if (sessionData && sessionData.sessionId) {
-          const image: IImage = await proxyService.getImageDetailsBySessionId(sessionData.sessionId);
-          const primaryPortDetails = image.runningPorts.find(runningPort => runningPort.primary);
-          const proxyPort = primaryPortDetails?.port || defaultProxyPort;
-          const proxyPath = image.proxyUrlPath || defaultProxyPath;
-          return `http://${environment === "Development" ? "localhost" : sessionData.sessionId}:${proxyPort}${proxyPath}`
+          const sessionsDetails: ISession[] = await proxyService.getSessionById(sessionData.sessionId);
+          const sessionDetails = sessionsDetails[0];
+          const proxyPort = sessionDetails.tcpPort || defaultProxyPort;
+          return `http://${environment === "Development" ? "localhost" : sessionData.sessionId}:${proxyPort}`
         }
       }
     } catch (error) {

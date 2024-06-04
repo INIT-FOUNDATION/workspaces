@@ -9,7 +9,8 @@ export interface IImage extends Document {
     registryUsername: string;
     registryPassword: string;
     isActive: boolean;
-    runningPorts: RunningPorts[];
+    tcpPortRange: string;
+    udpPortRange: string;
     volumeMountPath: string;
     defaultEnvs: string[];
     proxyUrlPath: string;
@@ -30,6 +31,11 @@ export interface IImage extends Document {
     imageId: string;
     imageName: string;
     status: number;
+    tcpPort: number;
+    udpPort: number;
+    environmentVariablesUsed: string[];
+    adminPassword: string;
+    userPassword: string;
   }
 
   export interface IAgent extends Document {
@@ -40,8 +46,6 @@ export interface IImage extends Document {
     sslEnabled: boolean;
     clientId: string;
     isActive: boolean;
-    tcpPortRange: string;
-    udpPortRange: string;
   }
 
   export interface IParticipant extends Document {
@@ -50,10 +54,4 @@ export interface IImage extends Document {
     sessionId: string;
     role: string;
     access: string;
-  }
-
-  export interface RunningPorts {
-    port: number;
-    protocol: string;
-    primary: boolean;
   }

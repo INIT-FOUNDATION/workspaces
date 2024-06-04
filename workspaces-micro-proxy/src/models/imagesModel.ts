@@ -10,14 +10,8 @@ const imageSchema = new Schema<IImage>({
   registryHost: { type: String },
   registryUsername: { type: String },
   registryPassword: { type: String },
-  runningPorts: {
-    type: [{
-      port: Number,
-      protocol: String,
-      primary: Boolean,
-    }],
-    required: true
-  },
+  tcpPortRange: { type: String },
+  udpPortRange: { type: String },
   volumeMountPath: { type: String },
   defaultEnvs: { type: [String] },
   proxyUrlPath: { type: String},

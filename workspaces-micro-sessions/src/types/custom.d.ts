@@ -8,8 +8,6 @@ export interface IAgent extends Document {
   sslEnabled: boolean;
   clientId: string;
   isActive: boolean;
-  tcpPortRange: string;
-  udpPortRange: string;
 }
 
 export interface AgentDetails {
@@ -20,8 +18,6 @@ export interface AgentDetails {
   sslEnabled: boolean;
   clientId: string;
   isActive: boolean;
-  tcpPortRange: string;
-  udpPortRange: string;
 }
 
 export interface ISession extends Document {
@@ -39,6 +35,11 @@ export interface ISession extends Document {
   imageId: string;
   imageName: string;
   status: number;
+  tcpPort: number;
+  udpPort: number;
+  adminPassword: string;
+  userPassword: string;
+  environmentVariablesUsed: string[]
 }
 
 export interface SessionDetails {
@@ -56,6 +57,11 @@ export interface SessionDetails {
   imageName: string;
   participantName: string;
   status: number;
+  tcpPort: number;
+  udpPort: number;
+  adminPassword: string;
+  userPassword: string;
+  environmentVariablesUsed: string[]
 }
 
 export interface IParticipant extends Document {
@@ -84,7 +90,8 @@ export interface IImage extends Document {
   registryPassword: string;
   isActive: boolean;
   clientId: string;
-  runningPorts: RunningPorts[];
+  tcpPortRange: string;
+  udpPortRange: string;
   volumeMountPath: string;
   defaultEnvs: string[];
   proxyUrlPath: string;
@@ -100,14 +107,9 @@ export interface ImageDetails {
   registryPassword: string;
   isActive: boolean;
   clientId: string;
-  runningPorts: RunningPorts[];
+  tcpPortRange: string;
+  udpPortRange: string;
   volumeMountPath: string;
   defaultEnvs: string[];
   proxyUrlPath: string;
-}
-
-export interface RunningPorts {
-  port: number;
-  protocol: string;
-  primary: Boolean
 }

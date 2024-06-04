@@ -17,6 +17,10 @@ export const validateCreateProxy = (proxyDetails: ISession) => {
     participantName: Joi.string(),
     saveSession: Joi.boolean().required(),
     status: Joi.number().required(),
+    tcpPort: Joi.number(),
+    udpPort: Joi.number(),
+    adminPassword: Joi.string().allow("", null),
+    userPassword: Joi.string().allow("", null)
   });
   return proxyDetailsSchema.validate(proxyDetails);
 };

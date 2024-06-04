@@ -129,9 +129,7 @@ export const agentsService = {
           agentHost: agentDetails.agentHost || undefined,
           agentPort: agentDetails.agentPort || undefined,
           sslEnabled: agentDetails.sslEnabled != undefined ? agentDetails.sslEnabled : true,
-          isActive: agentDetails.isActive != undefined ? agentDetails.isActive : AGENTS_STATUS.ACTIVE,
-          tcpPortRange: agentDetails.tcpPortRange || undefined,
-          udpPortRange: agentDetails.udpPortRange || undefined
+          isActive: agentDetails.isActive != undefined ? agentDetails.isActive : AGENTS_STATUS.ACTIVE
         }
       );
       redisUtils.delKey(`AGENT|ID:${agentDetails.agentId}`);

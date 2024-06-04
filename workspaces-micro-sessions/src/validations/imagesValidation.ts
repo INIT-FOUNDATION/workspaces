@@ -11,11 +11,8 @@ export const validateImage = (imageDetails: ImageDetails) => {
     registryHost: Joi.string().allow("", null),
     registryUsername: Joi.string().allow("", null),
     registryPassword: Joi.string().allow("", null),
-    runningPorts: Joi.array().items(Joi.object({
-      port: Joi.number().integer().min(80).max(65535).required(),
-      protocol: Joi.string().required(),
-      primary: Joi.boolean().required()
-    })).required(),
+    tcpPortRange: Joi.string().regex(/^\d+-\d+$/).required(),
+    udpPortRange: Joi.string().regex(/^\d+-\d+$/).required(),
     volumeMountPath: Joi.string().allow('', null).regex(/^\/.*/),
     defaultEnvs: Joi.array().items(Joi.string()),
     proxyUrlPath: Joi.string().allow('', null),
@@ -34,11 +31,8 @@ export const validateUpdateImage = (imageDetails: ImageDetails) => {
     registryHost: Joi.string().allow("", null),
     registryUsername: Joi.string().allow("", null),
     registryPassword: Joi.string().allow("", null),
-    runningPorts: Joi.array().items(Joi.object({
-      port: Joi.number().integer().min(80).max(65535).required(),
-      protocol: Joi.string().required(),
-      primary: Joi.boolean().required()
-    })),
+    tcpPortRange: Joi.string().allow("", null),
+    udpPortRange: Joi.string().allow("", null),
     volumeMountPath: Joi.string().allow('', null).regex(/^\/.*/),
     defaultEnvs: Joi.array().items(Joi.string()),
     proxyUrlPath: Joi.string().allow('', null),

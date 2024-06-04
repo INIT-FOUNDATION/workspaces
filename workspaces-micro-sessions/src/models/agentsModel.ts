@@ -13,8 +13,6 @@ class Agent {
   sslEnabled: boolean;
   clientId: string;
   isActive: boolean;
-  tcpPortRange: string;
-  udpPortRange: string;
 
   constructor(agent: IAgent) {
     this.agentId = agent.agentId || randomUUID();
@@ -24,8 +22,6 @@ class Agent {
     this.sslEnabled = agent.sslEnabled != undefined ? agent.sslEnabled : true;
     this.clientId = agent.clientId;
     this.isActive = AGENTS_STATUS.ACTIVE;
-    this.tcpPortRange = agent.tcpPortRange ? agent.tcpPortRange : envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_TCP_PORT_RANGE", "8000-9000");
-    this.udpPortRange = agent.udpPortRange ? agent.udpPortRange : envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_UDP_PORT_RANGE", "9100-10000");
   }
 }
 
@@ -40,8 +36,6 @@ const AgentModel: Model<IAgent> =
       sslEnabled: { type: Boolean, required: true },
       clientId: { type: String, required: true },
       isActive: { type: Boolean, required: true },
-      tcpPortRange: { type: String, required: true },
-      udpPortRange: { type: String, required: true }
     }, {
       timestamps: true,
     })

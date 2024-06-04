@@ -1,5 +1,5 @@
 import { Model, Schema } from "mongoose";
-import { IImage, RunningPorts } from "../types/custom";
+import { IImage } from "../types/custom";
 import { MONGO_COLLECTIONS, mongoUtils } from "workspaces-micro-commons";
 import { randomUUID } from "crypto";
 import { IMAGES_STATUS } from "../constants/imagesStatus";
@@ -14,7 +14,8 @@ class Image {
   registryPassword: string;
   isActive: boolean;
   clientId: string;
-  runningPorts: RunningPorts[];
+  tcpPortRange: string;
+  udpPortRange: string;
   volumeMountPath: string;
   defaultEnvs: string[];
   proxyUrlPath: string;
@@ -29,7 +30,8 @@ class Image {
     this.registryPassword = image.registryPassword;
     this.isActive = IMAGES_STATUS.ACTIVE;
     this.clientId = image.clientId;
-    this.runningPorts = image.runningPorts;
+    this.tcpPortRange = image.tcpPortRange;
+    this.udpPortRange = image.udpPortRange;
     this.volumeMountPath = image.volumeMountPath;
     this.defaultEnvs = image.defaultEnvs;
     this.proxyUrlPath = image.proxyUrlPath;
@@ -49,14 +51,8 @@ const ImageModel: Model<IImage> = mongoUtils.createModel(
       registryPassword: { type: String },
       isActive: { type: Boolean, required: true },
       clientId: { type: String, required: true },
-      runningPorts: {
-        type: [{
-          port: Number,
-          protocol: String,
-          primary: Boolean
-        }],
-        required: true
-      },
+      tcpPortRange: { type: String, required: true },
+      udpPortRange: { type: String, required: true },
       volumeMountPath: { type: String },
       defaultEnvs: { type: [String] },
       proxyUrlPath: { type: String }

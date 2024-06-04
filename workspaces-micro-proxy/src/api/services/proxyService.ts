@@ -14,7 +14,6 @@ const environment = envUtils.getStringEnvVariableOrDefault(
 export const proxyService = {
   createProxy: async (proxyDetails: any) => {
     try {
-      const soundDevice = await proxyService.getSoundDevice();
       const docker = await proxyService.getDockerClient();
       const images: IImage[] = await proxyService.getImageById(
         proxyDetails.imageId
@@ -28,7 +27,11 @@ export const proxyService = {
 
         await proxyService.ensureNetworkExists(networkName);
 
-        const defaultEnvs = [`START_URL=${proxyDetails.startUrl}`, `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`]
+        const defaultEnvs = [`NEKO_PASSWORD=${proxyDetails.userPassword}`, `NEKO_PASSWORD_ADMIN=${proxyDetails.adminPassword}`, `START_URL=${proxyDetails.startUrl}`, `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`]
+
+        if (environment === "Development" && proxyDetails.tcpPort && proxyDetails.udpPort) {
+          defaultEnvs.push(`NEKO_BIND=:${proxyDetails.tcpPort}`, `NEKO_UDPMUX=${proxyDetails.udpPort}`);
+        }
 
         const createOptions: ContainerCreateOptions = {
           name: proxyDetails.sessionId,
@@ -45,13 +48,10 @@ export const proxyService = {
           Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
-        if (environment === "Development" && createOptions.HostConfig && image.runningPorts) {
-          createOptions.HostConfig.PortBindings = image.runningPorts.reduce((bindings, port) => {
-            const key = `${port.port}/${port.protocol}`;
-            (bindings as { [key: string]: { HostPort: string }[] })[key] = [{ HostPort: port.port.toString() }];
-            return bindings;
-          }, {});
-        }
+        if (environment === "Development" && createOptions.HostConfig && proxyDetails.tcpPort && proxyDetails.udpPort) {
+          createOptions.HostConfig.PortBindings[`${proxyDetails.tcpPort}/tcp`] = [{ HostPort: `${proxyDetails.tcpPort}` }];
+          createOptions.HostConfig.PortBindings[`${proxyDetails.udpPort}/udp`] = [{ HostPort: `${proxyDetails.udpPort}` }];
+        }        
 
         if (proxyDetails.saveSession && image.volumeMountPath)
           createOptions.HostConfig?.Mounts?.push({
@@ -79,7 +79,13 @@ export const proxyService = {
             saveSession: proxyDetails.saveSession,
             imageId: proxyDetails.imageId,
             status: proxyDetails.status,
+            tcpPort: proxyDetails.tcpPort || undefined,
+            udpPort: proxyDetails.udpPort || undefined,
+            adminPassword: proxyDetails.adminPassword,
+            userPassword: proxyDetails.userPassword,
+            environmentVariablesUsed: createOptions.Env
           };
+          
           await mongoUtils.insertDocument<ISession>(SessionModel, sessionObj);
         }
       }
@@ -437,7 +443,8 @@ export const proxyService = {
           $project: {
             _id: 0,
             imageId: 1,
-            runningPorts: 1,
+            tcpPortRange: 1,
+            udpPortRange: 1,
             proxyUrlPath: 1
           }
         }

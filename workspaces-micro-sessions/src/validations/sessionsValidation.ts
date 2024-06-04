@@ -33,6 +33,11 @@ export const validateSessionDetails = async (
     imageId: Joi.string(),
     imageName: Joi.string().valid(...availableImageNames),
     status: Joi.number().valid(...Object.values(SESSIONS_STATUS)),
+    tcpPort: Joi.number(),
+    udpPort: Joi.number(),
+    adminPassword: Joi.string(),
+    userPassword: Joi.string(),
+    environmentVariablesUsed: Joi.array().items(Joi.string())
   });
   return sessionDetailsSchema.validate(sessionDetails);
 };

@@ -26,6 +26,10 @@ const Workspaces: React.FC = () => {
   const [drawCursors, setDrawCursors] = useState<boolean>(false);
   const [sessionStatus, setSessionStatus] = useState<number>(0);
   const [access, setAccess] = useState<string>("");
+  const [tcpPort, setTcpPort] = useState<number>(0);
+  const [sessionUserName, setSessionUserName] = useState<string>("");
+  const [sessionPassword, setSessionPassword] = useState<string>("");
+
   const { showLoader, hideLoader } = useLoader();
 
   const randomColor = () => {
@@ -54,6 +58,9 @@ const Workspaces: React.FC = () => {
             setAgentPort(response.data.data.agentPort);
             setAgentSSLEnabled(response.data.data.sslEnabled);
             setDrawCursors(response.data.data.drawCursors);
+            setTcpPort(response.data.data.tcpPort);
+            setSessionUserName(response.data.data.sessionUserName);
+            setSessionPassword(response.data.data.sessionPassword);
           }
         } catch (error) {
           console.error("Workspaces :: Error fetching proxy details :: ", error);
@@ -97,6 +104,9 @@ const Workspaces: React.FC = () => {
             agentPort={agentPort}
             agentSSLEnabled={agentSSLEnabled}
             access={access}
+            tcpPort={tcpPort}
+            sessionUserName={sessionUserName}
+            sessionPassword={sessionPassword}
           />
           {drawCursors && (
             <Cursors

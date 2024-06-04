@@ -21,6 +21,11 @@ class Session {
   imageName: string;
   saveSession: boolean;
   status: number;
+  tcpPort: number;
+  udpPort: number;
+  adminPassword: string;
+  userPassword: string;
+  environmentVariablesUsed: string[]
 
   constructor(session: ISession) {
     this.sessionId = session.sessionId || randomUUID();
@@ -37,6 +42,11 @@ class Session {
     this.imageName = session.imageName || envUtils.getStringEnvVariableOrDefault("WORKSPACES_DEFAULT_IMAGE", "chromium");
     this.saveSession = session.saveSession || false;
     this.status = SESSIONS_STATUS.ACTIVE;
+    this.tcpPort = session.tcpPort;
+    this.udpPort = session.udpPort;
+    this.adminPassword = session.adminPassword;
+    this.userPassword = session.userPassword;
+    this.environmentVariablesUsed = session.environmentVariablesUsed;
   }
 }
 
@@ -54,7 +64,11 @@ const SessionModel: Model<ISession> =
       darkMode: { type: Boolean, required: true },
       imageId: { type: String, required: true },
       saveSession: { type: Boolean, required: true },
-      status: { type: Number, required: true }
+      status: { type: Number, required: true },
+      tcpPort: { type: Number, required: true },
+      udpPort: { type: Number, required: true },
+      adminPassword: { type: String, required: true },
+      userPassword: { type: String, required: true }
     }, {
       timestamps: true,
     })

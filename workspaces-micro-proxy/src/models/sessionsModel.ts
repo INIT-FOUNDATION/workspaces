@@ -16,7 +16,12 @@ const SessionModel: Model<ISession> =
       darkMode: { type: Boolean, required: true },
       imageId: { type: String, required: true },
       saveSession: { type: Boolean, required: true },
-      status: { type: Number, required: true }
+      status: { type: Number, required: true },
+      tcpPort: { type: Number },
+      udpPort: { type: Number },
+      adminPassword: { type: String, required: true },
+      userPassword: { type: String, required: true },
+      environmentVariablesUsed: { type: [String], required: true }
     }, {
       timestamps: true,
     })

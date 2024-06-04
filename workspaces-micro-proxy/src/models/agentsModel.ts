@@ -13,8 +13,6 @@ const AgentModel: Model<IAgent> =
       sslEnabled: { type: Boolean, required: true },
       clientId: { type: String, required: true },
       isActive: { type: Boolean, required: true },
-      tcpPortRange: { type: String, required: true },
-      udpPortRange: { type: String, required: true }
     }, {
       timestamps: true,
     })

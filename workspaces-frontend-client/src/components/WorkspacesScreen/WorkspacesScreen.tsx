@@ -8,6 +8,9 @@ interface WorkspacesScreenProps {
   agentPort: string;
   agentSSLEnabled: boolean;
   access: string;
+  tcpPort: number;
+  sessionUserName: string;
+  sessionPassword: string;
 }
 
 const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
@@ -16,11 +19,12 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   agentHost,
   agentPort,
   agentSSLEnabled,
-  access
+  access,
+  tcpPort,
+  sessionUserName,
+  sessionPassword
 }) => {
   const { showLoader, hideLoader } = useLoader();
-  const userName = "admin";
-  const password = "admin";
 
   useEffect(() => {
     showLoader();
@@ -28,7 +32,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     const createIframeUrl = () => {
       const scheme = agentSSLEnabled ? "https" : "http";
       const rand = Math.floor((Math.random() * 1000000) + 1);
-      return `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=${userName}&pwd=${password}&uid=${rand}`;
+      return `${scheme}://${agentHost}:${tcpPort}?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
     };
 
     const iframe = document.createElement("iframe");
