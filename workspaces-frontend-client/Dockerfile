@@ -1,7 +1,7 @@
 FROM ghcr.io/techknowkraftai/node:12.22 AS build
 ARG ENVIRONMENT=dev
 WORKDIR /app
-COPY package*.json ./
+COPY package.json ./
 RUN npm install
 COPY . .
 RUN npm run build:$ENVIRONMENT
