@@ -14,40 +14,39 @@ interface WorkspacesScreenProps {
 }
 
 const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
-  sessionId,
-  participantId,
   agentHost,
   agentPort,
   agentSSLEnabled,
   access,
   tcpPort,
   sessionUserName,
-  sessionPassword
+  sessionPassword,
 }) => {
   const { showLoader, hideLoader } = useLoader();
 
   useEffect(() => {
     showLoader();
 
-    const createIframeUrl = () => {
+    const createObjectUrl = () => {
       const scheme = agentSSLEnabled ? "https" : "http";
-      const rand = Math.floor((Math.random() * 1000000) + 1);
+      const rand = Math.floor(Math.random() * 1000000) + 1;
       return `${scheme}://${agentHost}:${tcpPort}?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
     };
 
-    const iframe = document.createElement("iframe");
+    const objectElement = document.createElement("object");
 
-    iframe.src = createIframeUrl();
-    iframe.style.position = "absolute";
-    iframe.style.width = "100%";
-    iframe.style.height = "100%";
-    iframe.style.top = "0";
-    iframe.style.left = "0";
-    iframe.style.right = "0";
-    iframe.style.bottom = "0";
-    iframe.style.overflow = "hidden";
-    iframe.style.pointerEvents = access === "read" ? "none" : "auto";
-    iframe.style.border = "none";
+    objectElement.data = createObjectUrl();
+    objectElement.type = "text/html";
+    objectElement.style.position = "absolute";
+    objectElement.style.width = "100%";
+    objectElement.style.height = "100%";
+    objectElement.style.top = "0";
+    objectElement.style.left = "0";
+    objectElement.style.right = "0";
+    objectElement.style.bottom = "0";
+    objectElement.style.overflow = "hidden";
+    objectElement.style.pointerEvents = access === "read" ? "none" : "auto";
+    objectElement.style.border = "none";
 
     const handleLoad = () => {
       hideLoader();
@@ -55,11 +54,11 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
 
     const handleError = () => {
       console.log("WorkspacesScreen :: handleError");
-      iframe.src = createIframeUrl();
+      objectElement.data = createObjectUrl();
     };
 
-    iframe.addEventListener("load", handleLoad);
-    iframe.addEventListener("error", handleError);
+    objectElement.addEventListener("load", handleLoad);
+    objectElement.addEventListener("error", handleError);
 
     const container = document.createElement("div");
 
@@ -70,13 +69,13 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     container.style.height = "100%";
     container.style.overflow = "hidden";
 
-    container.appendChild(iframe);
+    container.appendChild(objectElement);
 
     document.body.appendChild(container);
 
     return () => {
-      iframe.removeEventListener("load", handleLoad);
-      iframe.removeEventListener("error", handleError);
+      objectElement.removeEventListener("load", handleLoad);
+      objectElement.removeEventListener("error", handleError);
       document.body.removeChild(container);
     };
   }, [access]);

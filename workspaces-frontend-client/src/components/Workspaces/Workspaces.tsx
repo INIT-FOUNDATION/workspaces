@@ -8,29 +8,29 @@ import { useSocket } from "../../contexts/SocketContext";
 import SessionsService from "../../services/SessionsService";
 import { useLoader } from "../../contexts/LoaderContext";
 import { workspacesWebsocketBaseUrl } from "../../utils/config";
-
-interface SessionAccess {
-  session_status: number;
-  access: string;
-}
+import { useMouse } from "@mantine/hooks";
+import { SessionAccess } from "../../types/custom";
 
 const Workspaces: React.FC = () => {
   const { token } = useParams();
   const socket = useSocket(workspacesWebsocketBaseUrl);
-  const [sessionId, setSessionId] = useState<string>("");
-  const [participantId, setParticipantId] = useState<string>("");
-  const [participantName, setParticipantName] = useState<string>("");
-  const [agentHost, setAgentHost] = useState<string>("");
-  const [agentPort, setAgentPort] = useState<string>("");
-  const [agentSSLEnabled, setAgentSSLEnabled] = useState<boolean>(false);
-  const [drawCursors, setDrawCursors] = useState<boolean>(false);
-  const [sessionStatus, setSessionStatus] = useState<number>(0);
-  const [access, setAccess] = useState<string>("");
-  const [tcpPort, setTcpPort] = useState<number>(0);
-  const [sessionUserName, setSessionUserName] = useState<string>("");
-  const [sessionPassword, setSessionPassword] = useState<string>("");
-
   const { showLoader, hideLoader } = useLoader();
+  const { x, y } = useMouse();
+
+  const [sessionDetails, setSessionDetails] = useState({
+    sessionId: "",
+    participantId: "",
+    participantName: "",
+    agentHost: "",
+    agentPort: "",
+    agentSSLEnabled: false,
+    drawCursors: false,
+    tcpPort: 0,
+    sessionUserName: "",
+    sessionPassword: "",
+    sessionStatus: 0,
+    access: "",
+  });
 
   const randomColor = () => {
     const letters = "0123456789ABCDEF";
@@ -43,59 +43,79 @@ const Workspaces: React.FC = () => {
 
   const cursorColor = randomColor();
 
+  const fetchSessionDetails = async (token: string) => {
+    try {
+      showLoader();
+      const response = await SessionsService.getProxyDetails(token);
+      hideLoader();
+      if (response.data && response.data.data) {
+        setSessionDetails((prevDetails) => ({
+          ...prevDetails,
+          ...response.data.data,
+        }));
+      }
+    } catch (error) {
+      console.error("Workspaces :: Error fetching proxy details :: ", error);
+      hideLoader();
+    }
+  };
+
   useEffect(() => {
     if (token) {
-      (async () => {
-        try {
-          showLoader();
-          const response = await SessionsService.getProxyDetails(token);
-          hideLoader();
-          if (response.data && response.data.data) {
-            setSessionId(response.data.data.sessionId);
-            setParticipantId(response.data.data.participantId);
-            setParticipantName(response.data.data.participantName);
-            setAgentHost(response.data.data.agentHost);
-            setAgentPort(response.data.data.agentPort);
-            setAgentSSLEnabled(response.data.data.sslEnabled);
-            setDrawCursors(response.data.data.drawCursors);
-            setTcpPort(response.data.data.tcpPort);
-            setSessionUserName(response.data.data.sessionUserName);
-            setSessionPassword(response.data.data.sessionPassword);
-          }
-        } catch (error) {
-          console.error("Workspaces :: Error fetching proxy details :: ", error);
-        }
-      })();
+      fetchSessionDetails(token);
     } else {
       console.error("Workspaces :: Workspaces Token not found");
     }
   }, [token]);
 
   useEffect(() => {
+    const { sessionId, participantId, participantName } = sessionDetails;
     if (!sessionId || !participantId || !participantName || !socket) return;
 
     socket.emit("workspaces_access", sessionId, participantId);
 
     socket.on("workspaces_access", (response: string) => {
       const sessionAccess: SessionAccess = JSON.parse(response);
-      if (sessionAccess.session_status != SESSIONS_STATUS.ACTIVE) {
+      if (sessionAccess.session_status !== SESSIONS_STATUS.ACTIVE) {
         toastUtils.error("Session not found");
       } else if (!sessionAccess.access) {
         toastUtils.error("Session Unauthorized");
       } else {
-        setSessionStatus(sessionAccess.session_status);
-        setAccess(sessionAccess.access);
+        setSessionDetails((prevDetails) => ({
+          ...prevDetails,
+          sessionStatus: sessionAccess.session_status,
+          access: sessionAccess.access,
+        }));
       }
     });
 
     return () => {
       socket.off("workspaces_access");
     };
-  }, [sessionId, participantId, participantName, socket]);
+  }, [sessionDetails.sessionId, sessionDetails.participantId, sessionDetails.participantName, socket]);
+
+  useEffect(() => {
+    console.log(x, y);
+  }, [x, y]);
+
+  const {
+    sessionId,
+    participantId,
+    participantName,
+    agentHost,
+    agentPort,
+    agentSSLEnabled,
+    drawCursors,
+    tcpPort,
+    sessionUserName,
+    sessionPassword,
+    sessionStatus,
+    access,
+  } = sessionDetails;
 
   return (
-    <>
-      {sessionStatus != 0 && access && (
+    <div style={{ width: "100%", height: "100%" }}>
+      {sessionStatus !== 0 && access && (
         <>
           <WorkspacesScreen
             sessionId={sessionId}
@@ -118,7 +138,7 @@ const Workspaces: React.FC = () => {
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
 
