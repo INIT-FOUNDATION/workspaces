@@ -322,6 +322,7 @@ export const sessionService = {
           access,
         }
       );
+      loggerUtils.info(`sessionServie :: setPermissions :: participantId :: ${participantId} :: access :: ${access}`);
       await redisUtils.delKey(`PARTICIPANT|${participantId}`);
     } catch (error) {
       loggerUtils.error(

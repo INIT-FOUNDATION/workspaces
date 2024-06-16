@@ -101,6 +101,9 @@ export const websocketService = {
             access: "",
           })
         );
+        loggerUtils.error(
+          `websocketService :: handleWorkspacesAccess :: sessionId :: ${sessionId} :: session does not exists!`
+        );
         return;
       }
 
@@ -109,6 +112,9 @@ export const websocketService = {
           await websocketService.getParticipantById(participantId);
 
         if (!participants || participants.length == 0) {
+          loggerUtils.error(
+            `websocketService :: handleWorkspacesAccess :: participantId :: ${participantId} :: participant does not exists!`
+          );
           socket.emit(
             "workspaces_access",
             JSON.stringify({
@@ -120,6 +126,9 @@ export const websocketService = {
         }
 
         const participant: IParticipant = participants[0];
+        loggerUtils.info(
+          `websocketService :: handleWorkspacesAccess :: participantId :: ${participantId} :: ${JSON.stringify(participant)}`
+        );
 
         socket.emit(
           "workspaces_access",
