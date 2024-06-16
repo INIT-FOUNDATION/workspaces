@@ -8,14 +8,12 @@ import { useSocket } from "../../contexts/SocketContext";
 import SessionsService from "../../services/SessionsService";
 import { useLoader } from "../../contexts/LoaderContext";
 import { workspacesWebsocketBaseUrl } from "../../utils/config";
-import { useMouse } from "@mantine/hooks";
 import { SessionAccess } from "../../types/custom";
 
 const Workspaces: React.FC = () => {
   const { token } = useParams();
   const socket = useSocket(workspacesWebsocketBaseUrl);
   const { showLoader, hideLoader } = useLoader();
-  const { x, y } = useMouse();
 
   const [sessionDetails, setSessionDetails] = useState({
     sessionId: "",
@@ -97,10 +95,6 @@ const Workspaces: React.FC = () => {
       socket.off("workspaces_access");
     };
   }, [sessionDetails.sessionId, sessionDetails.participantId, sessionDetails.participantName, socket]);
-
-  useEffect(() => {
-    console.log(x, y);
-  }, [x, y]);
 
   const {
     sessionId,
