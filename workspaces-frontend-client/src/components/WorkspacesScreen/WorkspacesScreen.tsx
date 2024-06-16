@@ -22,7 +22,6 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   sessionUserName,
   sessionPassword,
 }) => {
-  console.log("agentSSLEnabled",agentSSLEnabled)
   const { showLoader, hideLoader } = useLoader();
 
   useEffect(() => {
