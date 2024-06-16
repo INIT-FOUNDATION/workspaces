@@ -76,11 +76,15 @@ const Workspaces: React.FC = () => {
 
     socket.on("workspaces_access", (response: string) => {
       const sessionAccess: SessionAccess = JSON.parse(response);
+      console.log("Workspaces :: sessionAccess :: ", sessionAccess)
       if (sessionAccess.session_status !== SESSIONS_STATUS.ACTIVE) {
         toastUtils.error("Session not found");
+        console.log("Workspaces :: session not found")
       } else if (!sessionAccess.access) {
         toastUtils.error("Session Unauthorized");
+        console.log("Workspaces :: session unauthorized")
       } else {
+        console.log("Workspaces :: session data", sessionAccess)
         setSessionDetails((prevDetails) => ({
           ...prevDetails,
           sessionStatus: sessionAccess.session_status,
