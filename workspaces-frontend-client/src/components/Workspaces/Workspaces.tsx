@@ -21,7 +21,7 @@ const Workspaces: React.FC = () => {
     participantName: "",
     agentHost: "",
     agentPort: "",
-    agentSSLEnabled: false,
+    sslEnabled: false,
     drawCursors: false,
     tcpPort: 0,
     sessionUserName: "",
@@ -77,12 +77,9 @@ const Workspaces: React.FC = () => {
       console.log("Workspaces :: sessionAccess :: ", sessionAccess)
       if (sessionAccess.session_status !== SESSIONS_STATUS.ACTIVE) {
         toastUtils.error("Session not found");
-        console.log("Workspaces :: session not found")
       } else if (!sessionAccess.access) {
         toastUtils.error("Session Unauthorized");
-        console.log("Workspaces :: session unauthorized")
       } else {
-        console.log("Workspaces :: session data", sessionAccess)
         setSessionDetails((prevDetails) => ({
           ...prevDetails,
           sessionStatus: sessionAccess.session_status,
@@ -102,7 +99,7 @@ const Workspaces: React.FC = () => {
     participantName,
     agentHost,
     agentPort,
-    agentSSLEnabled,
+    sslEnabled,
     drawCursors,
     tcpPort,
     sessionUserName,
@@ -120,7 +117,7 @@ const Workspaces: React.FC = () => {
             participantId={participantId}
             agentHost={agentHost}
             agentPort={agentPort}
-            agentSSLEnabled={agentSSLEnabled}
+            agentSSLEnabled={sslEnabled}
             access={access}
             tcpPort={tcpPort}
             sessionUserName={sessionUserName}
