@@ -89,6 +89,7 @@ const Workspaces: React.FC = () => {
 
     return () => {
       socket.off("workspaces_access");
+      socket.disconnect();
     };
   }, [sessionDetails.sessionId, sessionDetails.participantId, sessionDetails.participantName, socket]);
 
