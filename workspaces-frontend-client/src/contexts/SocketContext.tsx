@@ -16,22 +16,25 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children, socket
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const newSocket = socketIOClient(socketUrl);
+    const useWebsocketForPermissions = process.env.REACT_APP_WORKSPACES_PARTICIPANT_PERMISSIONS_APPROACH === "websocket";
+    if (useWebsocketForPermissions) {
+      const newSocket = socketIOClient(socketUrl);
 
-    const handleReconnect = () => {
-      if (!newSocket.connected) {
-        newSocket.open();
-      }
-    };
+      const handleReconnect = () => {
+        if (!newSocket.connected) {
+          newSocket.open();
+        }
+      };
 
-    newSocket.on('reconnect_attempt', handleReconnect);
+      newSocket.on('reconnect_attempt', handleReconnect);
 
-    setSocket(newSocket);
+      setSocket(newSocket);
 
-    return () => {
-      newSocket.disconnect();
-      newSocket.off('reconnect_attempt', handleReconnect);
-    };
+      return () => {
+        newSocket.disconnect();
+        newSocket.off('reconnect_attempt', handleReconnect);
+      };
+    }
   }, [socketUrl]);
 
   return (
