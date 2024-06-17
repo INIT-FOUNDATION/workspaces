@@ -7,6 +7,9 @@ const SessionsService = {
         Authorization: `Bearer ${token}`,
       }
     });
+  },
+  getAccessBySessionIdAndParticipantId: async (sessionid: string, participantId: string) => {
+    return await get(`/api/v1/sessions/access/${participantId}/${sessionid}`);
   }
 };
 

@@ -11,6 +11,7 @@ import { SessionAccess } from "../../types/custom";
 
 const Workspaces: React.FC = () => {
   const { token } = useParams();
+  const useWebsocketForPermissions = process.env.REACT_APP_WORKSPACES_PARTICIPANT_PERMISSIONS_APPROACH === "websocket";
   const socket = useSocket();
   const { showLoader, hideLoader } = useLoader();
 
@@ -28,6 +29,8 @@ const Workspaces: React.FC = () => {
     sessionStatus: 0,
     access: "",
   });
+
+  const [fetchSessionAccessInterval, setFetchSessionAccessInterval] = useState<NodeJS.Timeout | null>(null);
 
   const randomColor = () => {
     const letters = "0123456789ABCDEF";
@@ -57,41 +60,77 @@ const Workspaces: React.FC = () => {
     }
   };
 
+  const fetchSessionAccess = async (sessionId: string, participantId: string) => {
+    try {
+      const response = await SessionsService.getAccessBySessionIdAndParticipantId(sessionId, participantId);
+      if (response.data && response.data.data) {
+        setSessionDetails((prevDetails) => ({
+          ...prevDetails,
+          sessionStatus: response.data.data.sessionStatus,
+          access: response.data.data.access
+        }));
+      }
+    } catch (error) {
+      console.error("Workspaces :: fetchSessionAccess :: ", error);
+      hideLoader();
+    }
+  };
+
   useEffect(() => {
     if (token) {
       fetchSessionDetails(token);
     } else {
       console.error("Workspaces :: Workspaces Token not found");
     }
+
+    return () => {
+      if (fetchSessionAccessInterval) {
+        clearInterval(fetchSessionAccessInterval);
+      }
+    };
   }, [token]);
 
   useEffect(() => {
     const { sessionId, participantId, participantName } = sessionDetails;
-    if (!sessionId || !participantId || !participantName || !socket) return;
+    if (!sessionId || !participantId || !participantName) return;
 
-    socket.emit("workspaces_access", sessionId, participantId);
+    if (useWebsocketForPermissions) {
+      if (!socket) return;
 
-    socket.on("workspaces_access", (response: string) => {
-      const sessionAccess: SessionAccess = JSON.parse(response);
-      console.log("Workspaces :: sessionAccess :: ", sessionAccess)
-      if (sessionAccess.session_status !== SESSIONS_STATUS.ACTIVE) {
-        toastUtils.error("Session not found");
-      } else if (!sessionAccess.access) {
-        toastUtils.error("Session Unauthorized");
-      } else {
-        setSessionDetails((prevDetails) => ({
-          ...prevDetails,
-          sessionStatus: sessionAccess.session_status,
-          access: sessionAccess.access,
-        }));
-      }
-    });
+      const handleWorkspaceAccess = (response: string) => {
+        const sessionAccess: SessionAccess = JSON.parse(response);
+        console.log("Workspaces :: sessionAccess :: ", sessionAccess);
+        if (sessionAccess.session_status !== SESSIONS_STATUS.ACTIVE) {
+          toastUtils.error("Session not found");
+        } else if (!sessionAccess.access) {
+          toastUtils.error("Session Unauthorized");
+        } else {
+          setSessionDetails((prevDetails) => ({
+            ...prevDetails,
+            sessionStatus: sessionAccess.session_status,
+            access: sessionAccess.access,
+          }));
+        }
+      };
 
-    return () => {
-      socket.off("workspaces_access");
-      socket.disconnect();
-    };
-  }, [sessionDetails.sessionId, sessionDetails.participantId, sessionDetails.participantName, socket]);
+      socket.emit("workspaces_access", sessionId, participantId);
+      socket.on("workspaces_access", handleWorkspaceAccess);
+
+      return () => {
+        socket.off("workspaces_access", handleWorkspaceAccess);
+        socket.disconnect();
+      };
+    } else {
+      const id = setInterval(() => fetchSessionAccess(sessionId, participantId), 2000);
+      setFetchSessionAccessInterval(id);
+
+      return () => {
+        if (id) {
+          clearInterval(id);
+        }
+      };
+    }
+  }, [sessionDetails.sessionId, sessionDetails.participantId, sessionDetails.participantName, socket, useWebsocketForPermissions]);
 
   const {
     sessionId,
