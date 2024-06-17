@@ -7,12 +7,11 @@ import toastUtils from "../../utils/toastUtils";
 import { useSocket } from "../../contexts/SocketContext";
 import SessionsService from "../../services/SessionsService";
 import { useLoader } from "../../contexts/LoaderContext";
-import { workspacesWebsocketBaseUrl } from "../../utils/config";
 import { SessionAccess } from "../../types/custom";
 
 const Workspaces: React.FC = () => {
   const { token } = useParams();
-  const socket = useSocket(workspacesWebsocketBaseUrl);
+  const socket = useSocket();
   const { showLoader, hideLoader } = useLoader();
 
   const [sessionDetails, setSessionDetails] = useState({

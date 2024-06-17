@@ -5,13 +5,14 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, BrowserRouter as Router } from "react-router-dom";
 import { LoaderProvider } from "./contexts/LoaderContext";
 import { SocketProvider } from "./contexts/SocketContext";
+import { workspacesWebsocketBaseUrl } from './utils/config';
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <LoaderProvider>
-    <SocketProvider>
+    <SocketProvider socketUrl={workspacesWebsocketBaseUrl}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
