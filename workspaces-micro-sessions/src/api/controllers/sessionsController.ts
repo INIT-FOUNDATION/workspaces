@@ -4,7 +4,7 @@ import {
   HTTP_STATUS_CODES,
   loggerUtils,
 } from "workspaces-micro-commons";
-import { SESSION_ERROR_RESPONSES } from "../../constants";
+import { SESSIONS_STATUS, SESSION_ERROR_RESPONSES } from "../../constants";
 import { IParticipant, ISession, SessionDetails } from "../../types/custom";
 import { Session } from "../../models/sessionsModel";
 import {
@@ -254,6 +254,52 @@ export const sessionsController = {
     } catch (error) {
       loggerUtils.error(
         `sessionsController :: listSessionsByClientId :: ${error}`
+      );
+      return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send({
+        data: null,
+        message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+      });
+    }
+  },
+  getAccessByParticipantIdAndSessionId: async (
+    req: Request,
+    res: Response
+  ): Promise<Response> => {
+    try {
+      const participantId = req.params.participantId;
+      const sessionId = req.params.sessionId;
+
+      if (!participantId) return res.status(HTTP_STATUS_CODES.BAD_REQUEST).send(SESSION_ERROR_RESPONSES.SESSERR009);
+      if (!sessionId) return res.status(HTTP_STATUS_CODES.BAD_REQUEST).send(SESSION_ERROR_RESPONSES.SESSERR002);
+
+      const sessionExists = await sessionService.sessionExistsById(sessionId);
+      if (!sessionExists) return res.status(HTTP_STATUS_CODES.OK).send({
+        data: {
+          sessionStatus: SESSIONS_STATUS.INACTIVE,
+          access: ""
+        },
+        message: "Session Status Fetched Successfully"
+      });
+
+      const participantExists = await sessionService.participantExistsById(participantId);
+      if (!participantExists) return res.status(HTTP_STATUS_CODES.OK).send({
+        data: {
+          sessionStatus: SESSIONS_STATUS.ACTIVE,
+          access: ""
+        },
+        message: "Session Status Fetched Successfully"
+      });
+
+      const participants = await sessionService.getParticipantById(participantId);
+      const participant = participants[0];
+
+      return res.status(HTTP_STATUS_CODES.OK).send({
+        data: { sessionStatus: SESSIONS_STATUS.ACTIVE, access: participant.access },
+        message: "Session Status Fetched Successfully",
+      });
+    } catch (error) {
+      loggerUtils.error(
+        `sessionsController :: getAccessByParticipantIdAndSessionId :: ${error}`
       );
       return res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).send({
         data: null,

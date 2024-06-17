@@ -355,7 +355,14 @@ export const sessionService = {
     participantId: string
   ): Promise<IParticipant[]> => {
     try {
-      const participant: IParticipant[] =
+      const key = `PARTICIPANT|${participantId}`;
+      const cachedData = await redisUtils.getKey(key);
+
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
+      const participants: IParticipant[] =
         await mongoUtils.findDocumentsWithOptions<IParticipant>(
           ParticipantModel,
           {
@@ -363,16 +370,24 @@ export const sessionService = {
           },
           {
             _id: 0,
+            __v: 0,
             createdAt: 0,
             updatedAt: 0,
-            __v: 0,
           },
           {}
         );
-      return participant;
+
+      if (participants.length > 0)
+        await redisUtils.setKey(
+          key,
+          JSON.stringify(participants),
+          CACHE_TTL.ONE_HOUR
+        );
+
+      return participants;
     } catch (error) {
       loggerUtils.error(
-        `sessionsService :: getParticipantById :: participantId ${participantId} :: ${error}`
+        `sessionsService :: getParticipantById :: participantId :: ${participantId} :: ${error}`
       );
       throw error;
     }

@@ -60,6 +60,10 @@ const SESSION_ERROR_RESPONSES = {
     errorCode: "SESSERR008",
     errorMessage: "Session Concurrency Limit Exceeded!",
   },
+  SESSERR009: {
+    errorCode: "SESSERR009",
+    errorMessage: "Participant Id Required!",
+  },
 };
 
 const IMAGE_ERROR_RESPONSES = {

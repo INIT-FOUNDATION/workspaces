@@ -20,4 +20,6 @@ sessionsRouter.put("/setPermissions", clientMiddleware, sessionsController.setPe
 
 sessionsRouter.delete("/:sessionId", clientMiddleware, sessionsController.destroySession);
 
+sessionsRouter.get("/access/:participantId/:sessionId", sessionsController.getAccessByParticipantIdAndSessionId);
+
 export { sessionsRouter };
