@@ -1,10 +1,11 @@
 import { CACHE_TTL, MONGO_COLLECTIONS, envUtils, loggerUtils, mongoUtils, nodeCacheUtils, redisUtils } from "workspaces-micro-commons";
-import { IImage, IParticipant, ISession } from "../../types/custom";
-import { IMAGES_STATUS, SESSIONS_STATUS } from "../../constants";
+import { IAgent, IImage, IParticipant, ISession } from "../../types/custom";
+import { AGENTS_STATUS, IMAGES_STATUS, SESSIONS_STATUS } from "../../constants";
 import { ImageModel } from "../../models/imagesModel";
 import { ParticipantModel } from "../../models/participantsModel";
 import { SessionModel } from "../../models/sessionsModel";
 import Docker, { ContainerCreateOptions } from "dockerode";
+import { AgentModel } from "../../models/agentsModel";
 
 const environment = envUtils.getStringEnvVariableOrDefault(
   "NODE_ENV",
@@ -33,6 +34,14 @@ export const proxyService = {
           `START_URL=${proxyDetails.startUrl}`,
           `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`,
         ]
+
+        if (environment !== "Development" && envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_ENABLE_TURN_SUPPORT", false)) {
+          const agents = await proxyService.getAgentById(proxyDetails.agentId);
+          const agent = agents[0];
+          const turnUsername = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_USERNAME", "neko");
+          const turnPassword = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_PASSWORD", "neko");
+          defaultEnvs.push(`NEKO_ICESERVERS='[{ "urls": [ "turn:${agent.agentHost}:3478" ], "username":"${turnUsername}", "credential":"${turnPassword}}" }, { "urls": [ "stun:stun.nextcloud.com:3478" ] }]'`)
+        }
 
         if (environment === "Development" && proxyDetails.tcpPort && proxyDetails.udpPort) {
           defaultEnvs.push(`NEKO_BIND=:${proxyDetails.tcpPort}`, `NEKO_UDPMUX=${proxyDetails.udpPort}`);
@@ -500,6 +509,40 @@ export const proxyService = {
     } catch (error) {
       loggerUtils.error(
         `proxyService :: getImageDetailsBySessionId :: sessionId ${sessionId} :: ${error}`
+      );
+      throw error;
+    }
+  },
+  getAgentById: async (agentId: string): Promise<IAgent[]> => {
+    try {
+      const key = `AGENT|ID:${agentId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
+      const agents: IAgent[] =
+        await mongoUtils.findDocumentsWithOptions<IAgent>(
+          AgentModel,
+          {
+            agentId,
+            isActive: AGENTS_STATUS.ACTIVE,
+          },
+          {
+            _id: 0,
+            __v: 0,
+            clientId: 0,
+            createdAt: 0,
+            updatedAt: 0,
+            isActive: 0,
+          },
+          {}
+        );
+      redisUtils.setKey(key, JSON.stringify(agents), CACHE_TTL.ONE_DAY);
+      return agents;
+    } catch (error) {
+      loggerUtils.error(
+        `proxyService :: getAgentById :: agentId ${agentId} :: ${error}`
       );
       throw error;
     }
