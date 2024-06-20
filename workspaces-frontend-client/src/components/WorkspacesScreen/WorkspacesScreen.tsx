@@ -14,6 +14,8 @@ interface WorkspacesScreenProps {
 }
 
 const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
+  sessionId,
+  participantId,
   agentHost,
   agentPort,
   agentSSLEnabled,
@@ -30,7 +32,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     const createUrl = () => {
       const scheme = agentSSLEnabled ? "https" : "http";
       const rand = Math.floor(Math.random() * 1000000) + 1;
-      return `${scheme}://${agentHost}:${tcpPort}?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
+      return `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
     };
 
     const iframeElement = document.createElement("iframe");
