@@ -23,6 +23,7 @@ import { SESSIONS_STATUS } from "../../constants";
 import { imagesService } from "./imagesService";
 import { proxyService } from "./proxyService";
 import crypto from "crypto";
+const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development");
 
 export const sessionService = {
   createSession: async (
@@ -68,7 +69,7 @@ export const sessionService = {
 
           const availableAgent = availableAgents[0];
 
-          if (envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development")) {
+          if (environment === "Development") {
             const availablePorts = await sessionService.getAvailableTCPUDPPorts(image.imageId, image.tcpPortRange, image.udpPortRange);
             if (availablePorts.tcpPort === 0 || availablePorts.udpPort === 0) {
               loggerUtils.error(
