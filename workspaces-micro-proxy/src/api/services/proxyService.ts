@@ -36,11 +36,22 @@ export const proxyService = {
         ]
 
         if (environment !== "Development" && envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_ENABLE_TURN_SUPPORT", false)) {
-          const agents = await proxyService.getAgentById(proxyDetails.agentId);
-          const agent = agents[0];
-          const turnUsername = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_USERNAME", "neko");
-          const turnPassword = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_PASSWORD", "neko");
-          defaultEnvs.push(`NEKO_ICESERVERS='[{ "urls": [ "turn:${agent.agentHost}:3478" ], "username":"${turnUsername}", "credential":"${turnPassword}}" }, { "urls": [ "stun:stun.nextcloud.com:3478" ] }]'`)
+          const turnServers = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_SERVERS", JSON.stringify([
+            {
+              "urls": ["stun:stun.relay.metered.ca:80"]
+            },
+            {
+              "urls": [
+                "turn:global.relay.metered.ca:80",
+                "turn:global.relay.metered.ca:80?transport=tcp",
+                "turn:global.relay.metered.ca:443",
+                "turns:global.relay.metered.ca:443?transport=tcp"
+              ],
+              "username": "fd1ed9dd5fac3a31ed267d59",
+              "credential": "vj58mBbRrmJlikQV"
+            }
+          ]))
+          defaultEnvs.push(`NEKO_ICESERVERS=${turnServers}`)
         }
 
         if (environment === "Development" && proxyDetails.tcpPort && proxyDetails.udpPort) {
