@@ -7,11 +7,6 @@ import { SessionModel } from "../../models/sessionsModel";
 import Docker, { ContainerCreateOptions } from "dockerode";
 import { AgentModel } from "../../models/agentsModel";
 
-const environment = envUtils.getStringEnvVariableOrDefault(
-  "NODE_ENV",
-  "Development"
-);
-
 export const proxyService = {
   createProxy: async (proxyDetails: any) => {
     try {
@@ -25,6 +20,7 @@ export const proxyService = {
       if (!containerSessionExists) {
         const autoRemoval = envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_PROXY_CONTAINERS_AUTO_REMOVE", true);
         const networkName = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_CONTAINERS_NETWORK", "workspaces-proxy-network");
+        const openPorts = proxyDetails.tcpPort && proxyDetails.udpPort;
 
         await proxyService.ensureNetworkExists(networkName);
 
@@ -35,7 +31,7 @@ export const proxyService = {
           `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`,
         ]
 
-        if (environment !== "Development" && envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_ENABLE_TURN_SUPPORT", false)) {
+        if (!openPorts && envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_ENABLE_TURN_SUPPORT", false)) {
           const turnServers = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_SERVERS", JSON.stringify([
             {
               "urls": ["stun:stun.relay.metered.ca:80"]
@@ -54,7 +50,7 @@ export const proxyService = {
           defaultEnvs.push(`NEKO_ICESERVERS=${turnServers}`)
         }
 
-        if (environment === "Development" && proxyDetails.tcpPort && proxyDetails.udpPort) {
+        if (openPorts) {
           defaultEnvs.push(`NEKO_BIND=:${proxyDetails.tcpPort}`, `NEKO_UDPMUX=${proxyDetails.udpPort}`);
         }
 
@@ -74,7 +70,7 @@ export const proxyService = {
           Image: `${image.imageRepo}:${image.imageTag}`,
         };
 
-        if (envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_SSL_ENABLED", false)) {
+        if (openPorts) {
           const agentSSLCertPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_CERT_PATH", "/etc/letsencrypt/live/example.com/fullchain.pem")
           const agentSSLKeyPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_AGENT_SSL_KEY_PATH", "/etc/letsencrypt/live/example.com/privkey.pem")
           const proxySSLCertPath = envUtils.getStringEnvVariableOrDefault("WORKSPACES_PROXY_SSL_KEY_PATH", "/app/fullchain.pem")
@@ -101,7 +97,7 @@ export const proxyService = {
           }
         }
 
-        if (environment === "Development" && createOptions.ExposedPorts && createOptions.HostConfig && proxyDetails.tcpPort && proxyDetails.udpPort) {
+        if (createOptions.ExposedPorts && createOptions.HostConfig && openPorts) {
           createOptions.HostConfig.PortBindings[`${proxyDetails.tcpPort}/tcp`] = [{ HostPort: `${proxyDetails.tcpPort}` }];
           createOptions.HostConfig.PortBindings[`${proxyDetails.udpPort}/udp`] = [{ HostPort: `${proxyDetails.udpPort}` }];
 
