@@ -83,6 +83,8 @@ export default function (app: Express): void {
     router,
     ws: true,
     changeOrigin: true,
+    timeout: envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_READ_TIMEOUT", 60 * 1000),
+    proxyTimeout: envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_WRITE_TIMEOUT", 60 * 1000),
     pathRewrite: async (path: string, req: Request) => {
       let sessionId, participantId;
 
@@ -97,7 +99,7 @@ export default function (app: Express): void {
       }
       return path.replace(`/api/v1/proxy/${sessionId}/${participantId}`, '');
     },
-    logger: loggerUtils
+    logger: loggerUtils,
   }
 
   app.use("/api/v1/proxy/:sessionId/:participantId", proxyMiddleware, createProxyMiddleware<Request, Response>(proxyOptions))
