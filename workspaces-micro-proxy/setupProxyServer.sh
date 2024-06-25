@@ -42,7 +42,7 @@ obtain_ssl_certificates() {
         sudo certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
         chmod 644 /etc/letsencrypt/live/$DOMAIN/fullchain.pem
         chmod 644/etc/letsencrypt/live/$DOMAIN/privkey.pem
-        cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem >> /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
+        cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem > /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
     else
         echo "SSL certificates for $DOMAIN already exist. Skipping Certbot."
     fi
