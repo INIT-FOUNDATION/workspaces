@@ -69,8 +69,9 @@ defaults
     option httplog
     option dontlognull
     timeout connect 5000
-    timeout client 50000
-    timeout server 50000
+    timeout client 65s
+    timeout server 65s
+    timeout tunnel 65s
 
 resolvers docker
     nameserver dns1 127.0.0.11:53
@@ -93,6 +94,11 @@ EOL
     cat <<EOL > $HAPROXY_DIR/target_servers.cfg
 backend workspaces-micro-proxy
     balance roundrobin
+    mode http
+    option tcplog
+    timeout connect 5s
+    timeout client 10800s
+    timeout server 10800s
     server workspaces-micro-proxy workspaces-micro-proxy:5002 resolvers docker
 EOL
 
@@ -135,6 +141,9 @@ services:
       - WORKSPACES_SESSIONS_SSL_ENABLED=true
       - WORKSPACES_AGENT_SSL_CERT_PATH=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
       - WORKSPACES_AGENT_SSL_KEY_PATH=/etc/letsencrypt/live/$DOMAIN/privkey.pem
+      - NODE_ENV=Production
+      - WORKSPACES_ENABLE_TURN_SUPPORT=true
+      - WORKSPACES_TURN_SERVERS=[{"urls":["stun:turn.orrizonte.in"]},{"urls":["turn:turn.orrizonte.in"],"username":"a8z7G3p9F1s6","credential":"bmS8QSeG7SHwPLSo"}]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
