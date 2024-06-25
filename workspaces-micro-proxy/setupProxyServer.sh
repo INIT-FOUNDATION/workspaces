@@ -248,7 +248,7 @@ pull_images() {
 }
 
 create_network_if_not_exists() {
-  local network_name=$PROXY_NETWORK
+  local network_name="workspaces-proxy-network"
 
   # Check if the network exists
   if ! docker network inspect "$network_name" >/dev/null 2>&1; then
@@ -270,7 +270,6 @@ main() {
     read -p "Enter API base URL for agent creation and image list (e.g., http://localhost:5001): " API_BASE_URL
     read -p "Enter clientId: " CLIENT_ID
     read -p "Enter clientSecret: " CLIENT_SECRET
-    read -sp "Enter Network Name: " PROXY_NETWORK
 
 
     SOURCE_DIR="."
