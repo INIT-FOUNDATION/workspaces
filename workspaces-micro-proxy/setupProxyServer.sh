@@ -40,9 +40,9 @@ install_docker_if_needed() {
 obtain_ssl_certificates() {
     if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
         sudo certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
-        cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem > /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
         chmod 644 /etc/letsencrypt/live/$DOMAIN/fullchain.pem
         chmod 644/etc/letsencrypt/live/$DOMAIN/privkey.pem
+        cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem >> /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
     else
         echo "SSL certificates for $DOMAIN already exist. Skipping Certbot."
     fi
