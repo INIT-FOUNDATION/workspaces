@@ -48,7 +48,7 @@ export const proxyService = {
           defaultEnvs.push(`NEKO_ICESERVERS=${iceServersString}`)
 
           const parsedIceServers = JSON.parse(iceServersString);
-          const iceServer = parsedIceServers.flatMap(server => server.urls).find(url => url.startsWith("stun:")) || '';
+          const iceServer: string = parsedIceServers.flatMap((server: any) => server.urls).find((url: string) => url.startsWith("stun:")) || '';
           defaultEnvs.push(`NEKO_ICESERVER=${iceServer}`)
         }
 
