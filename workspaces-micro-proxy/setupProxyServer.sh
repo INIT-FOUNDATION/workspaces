@@ -146,25 +146,11 @@ services:
       - NODE_ENV=Production
       - WORKSPACES_ENABLE_TURN_SUPPORT=true
       - WORKSPACES_TURN_SERVERS=[{"urls":["stun:turn.orrizonte.in"]},{"urls":["turn:turn.orrizonte.in"],"username":"a8z7G3p9F1s6","credential":"bmS8QSeG7SHwPLSo"}]
+      - HTTPS_ENABLED=true
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  haproxy:
-    image: haproxy:latest
-    container_name: haproxy
-    volumes:
-      - ./haproxy/haproxy.cfg:/etc/haproxy/haproxy.cfg
-      - ./haproxy/target_servers.cfg:/etc/haproxy/haproxy.d/target_servers.cfg
-      - ./haproxy/sites_available.cfg:/etc/haproxy/haproxy.d/sites_available.cfg
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    networks:
-      - workspaces-proxy-network
-    ports:
-      - "80:80"
-      - "443:443"
-    restart: always
-    user: root
-    command: haproxy -d -f /etc/haproxy/haproxy.cfg -f /etc/haproxy/haproxy.d
+      - /etc/letsencrypt/live/$DOMAIN/privkey.pem:/usr/src/app/certs/key.pem
+      - /etc/letsencrypt/live/$DOMAIN/cert.pem:/usr/src/app/certs/cert.pem
 
 networks:
   workspaces-proxy-network:
@@ -286,7 +272,7 @@ main() {
     install_docker_if_needed
 
     obtain_ssl_certificates
-    create_haproxy_config
+    # create_haproxy_config
     create_docker_compose_file
     create_network_if_not_exists
 
