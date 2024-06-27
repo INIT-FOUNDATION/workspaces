@@ -23,7 +23,7 @@ const pullImages = envUtils.getBooleanEnvVariableOrDefault(
   false
 );
 const HTTPS_ENABLED = envUtils.getBooleanEnvVariableOrDefault("HTTPS_ENABLED", false);
-const HTTPS_PORT = envUtils.getNumberEnvVariableOrDefault("HTTPS_PORT", 8443);
+const HTTPS_PORT = envUtils.getNumberEnvVariableOrDefault("HTTPS_PORT", 443);
 const SSL_KEY_PATH = envUtils.getStringEnvVariableOrDefault("SSL_KEY_PATH", "/usr/src/app/certs/key.pem");
 const SSL_CERT_PATH = envUtils.getStringEnvVariableOrDefault("SSL_CERT_PATH", "/usr/src/app/certs/cert.pem");
 
