@@ -128,6 +128,8 @@ services:
     networks:
       - workspaces-proxy-network
     restart: always
+    ports:
+    - 443:443
     environment:
       - WORKSPACES_REDIS_KEYS_PREFIX=WORKSPACES|
       - WORKSPACES_REDIS_HOST=10.200.0.6
