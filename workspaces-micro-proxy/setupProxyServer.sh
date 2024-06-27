@@ -30,7 +30,9 @@ install_docker_if_needed() {
         $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
         sudo apt-get update
-        sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
+        sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+        sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
+        sudo chmod +x /usr/bin/docker-compose
     else
         echo "Docker is already installed."
     fi
@@ -40,9 +42,9 @@ install_docker_if_needed() {
 obtain_ssl_certificates() {
     if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
         sudo certbot certonly --standalone -d $DOMAIN --non-interactive --agree-tos --email $EMAIL
-        cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem > /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
         chmod 644 /etc/letsencrypt/live/$DOMAIN/fullchain.pem
         chmod 644/etc/letsencrypt/live/$DOMAIN/privkey.pem
+        cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem /etc/letsencrypt/live/$DOMAIN/privkey.pem > /etc/letsencrypt/live/$DOMAIN/$DOMAIN.pem
     else
         echo "SSL certificates for $DOMAIN already exist. Skipping Certbot."
     fi
@@ -69,8 +71,9 @@ defaults
     option httplog
     option dontlognull
     timeout connect 5000
-    timeout client 50000
-    timeout server 50000
+    timeout client 65s
+    timeout server 65s
+    timeout tunnel 65s
 
 resolvers docker
     nameserver dns1 127.0.0.11:53
@@ -93,6 +96,11 @@ EOL
     cat <<EOL > $HAPROXY_DIR/target_servers.cfg
 backend workspaces-micro-proxy
     balance roundrobin
+    mode http
+    option tcplog
+    timeout connect 5s
+    timeout client 10800s
+    timeout server 10800s
     server workspaces-micro-proxy workspaces-micro-proxy:5002 resolvers docker
 EOL
 
@@ -135,6 +143,9 @@ services:
       - WORKSPACES_SESSIONS_SSL_ENABLED=true
       - WORKSPACES_AGENT_SSL_CERT_PATH=/etc/letsencrypt/live/$DOMAIN/fullchain.pem
       - WORKSPACES_AGENT_SSL_KEY_PATH=/etc/letsencrypt/live/$DOMAIN/privkey.pem
+      - NODE_ENV=Production
+      - WORKSPACES_ENABLE_TURN_SUPPORT=true
+      - WORKSPACES_TURN_SERVERS=[{"urls":["stun:turn.orrizonte.in"]},{"urls":["turn:turn.orrizonte.in"],"username":"a8z7G3p9F1s6","credential":"bmS8QSeG7SHwPLSo"}]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -239,7 +250,7 @@ pull_images() {
 }
 
 create_network_if_not_exists() {
-  local network_name=$PROXY_NETWORK
+  local network_name="workspaces-proxy-network"
 
   # Check if the network exists
   if ! docker network inspect "$network_name" >/dev/null 2>&1; then
@@ -261,7 +272,6 @@ main() {
     read -p "Enter API base URL for agent creation and image list (e.g., http://localhost:5001): " API_BASE_URL
     read -p "Enter clientId: " CLIENT_ID
     read -p "Enter clientSecret: " CLIENT_SECRET
-    read -sp "Enter Network Name: " PROXY_NETWORK
 
 
     SOURCE_DIR="."

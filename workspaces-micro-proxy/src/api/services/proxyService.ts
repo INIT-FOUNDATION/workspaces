@@ -32,22 +32,24 @@ export const proxyService = {
         ]
 
         if (!openPorts && envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_ENABLE_TURN_SUPPORT", false)) {
-          const turnServers = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_SERVERS", JSON.stringify([
+          const iceServers = [
             {
-              "urls": ["stun:stun.relay.metered.ca:80"]
+              "urls": ["stun:turn.orrizonte.in"]
             },
             {
               "urls": [
-                "turn:global.relay.metered.ca:80",
-                "turn:global.relay.metered.ca:80?transport=tcp",
-                "turn:global.relay.metered.ca:443",
-                "turns:global.relay.metered.ca:443?transport=tcp"
+                "turn:turn.orrizonte.in"
               ],
-              "username": "fd1ed9dd5fac3a31ed267d59",
-              "credential": "vj58mBbRrmJlikQV"
+              "username": "a8z7G3p9F1s6",
+              "credential": "bmS8QSeG7SHwPLSo"
             }
-          ]))
-          defaultEnvs.push(`NEKO_ICESERVERS=${turnServers}`)
+          ]
+          const iceServersString = envUtils.getStringEnvVariableOrDefault("WORKSPACES_TURN_SERVERS", JSON.stringify(iceServers))
+          defaultEnvs.push(`NEKO_ICESERVERS=${iceServersString}`)
+
+          const parsedIceServers = JSON.parse(iceServersString);
+          const iceServer: string = parsedIceServers.flatMap((server: any) => server.urls).find((url: string) => url.startsWith("stun:")) || '';
+          defaultEnvs.push(`NEKO_ICESERVER=${iceServer}`)
         }
 
         if (openPorts) {
