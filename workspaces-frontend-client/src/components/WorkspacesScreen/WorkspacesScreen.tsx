@@ -35,7 +35,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
         url: `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/ws?password=${sessionPassword}`,
       });
       websocketHeartbeatJs.onopen = function () {
-        console.log('WorkspacesScreen :: Hearbeat :: connect success');
+        console.log('WorkspacesScreen :: Hearbeat :: Connected');
         websocketHeartbeatJs.send('hello server');
       }
       websocketHeartbeatJs.onreconnect = function () {
@@ -44,7 +44,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       }
     }
     return () => {
-      websocketHeartbeatJs.close();
+      if (websocketHeartbeatJs) websocketHeartbeatJs.close();
     };
   }, [])
 
