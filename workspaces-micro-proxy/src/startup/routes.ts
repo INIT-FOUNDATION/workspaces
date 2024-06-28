@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import { proxyRouter } from "../api/routes/proxyRouter";
 import {
   CACHE_TTL,
-  HTTP_STATUS_CODES,
   envUtils,
   expressConstants,
   loggerUtils,
@@ -102,15 +101,6 @@ export default function (app: Express): void {
       return path.replace(`/api/v1/proxy/${sessionId}/${participantId}`, '');
     },
     logger: loggerUtils,
-    onProxyReqWs: (proxyReq: Request, req: Request, socket: Socket, options: Options) => {
-      loggerUtils.info(`routes :: proxyOptions :: WebSocket request: ${req.url}`);
-    },
-    onError: (err: Error, req: Request, res: ServerResponse) => {
-      loggerUtils.error(`routes :: proxyOptions :: WebSocket proxy error: ${err.message}`);
-    },
-    onProxyRes: (proxyRes: ServerResponse, req: Request, res: Response) => {
-      loggerUtils.info(`routes :: proxyOptions :: WebSocket response from target: ${proxyRes.statusCode}`);
-    },
   }
 
   app.use("/api/v1/proxy/:sessionId/:participantId", proxyMiddleware, createProxyMiddleware<Request, Response>(proxyOptions))
