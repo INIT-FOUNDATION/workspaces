@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLoader } from "../../contexts/LoaderContext";
+import WebsocketHeartbeatJs from 'websocket-heartbeat-js';
 
 interface WorkspacesScreenProps {
   sessionId: string;
@@ -25,6 +26,27 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   sessionPassword,
 }) => {
   const { showLoader, hideLoader } = useLoader();
+  const [reconnectingAttempt, setReconnectingAttempt] = useState<number>(1);
+
+  useEffect(() => {
+    let websocketHeartbeatJs: WebsocketHeartbeatJs;
+    if (agentPort && tcpPort === 0) {
+      websocketHeartbeatJs = new WebsocketHeartbeatJs({
+        url: `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/ws?password=${sessionPassword}`,
+      });
+      websocketHeartbeatJs.onopen = function () {
+        console.log('WorkspacesScreen :: Hearbeat :: connect success');
+        websocketHeartbeatJs.send('hello server');
+      }
+      websocketHeartbeatJs.onreconnect = function () {
+        setReconnectingAttempt((reconnectingAttempt) => reconnectingAttempt + 1);
+        console.log('WorkspacesScreen :: Hearbeat :: Reconnecting');
+      }
+    }
+    return () => {
+      websocketHeartbeatJs.close();
+    };
+  }, [])
 
   useEffect(() => {
     showLoader();
@@ -34,7 +56,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       const rand = Math.floor(Math.random() * 1000000) + 1;
       if (tcpPort && tcpPort > 0) {
         return `${scheme}://${agentHost}:${tcpPort}/?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
-      } 
+      }
       return `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
     };
 
@@ -82,7 +104,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       iframeElement.removeEventListener("error", handleError);
       document.body.removeChild(container);
     };
-  }, [access]);
+  }, [access, reconnectingAttempt]);
 
   return null;
 };
