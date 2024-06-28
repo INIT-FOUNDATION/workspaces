@@ -33,8 +33,8 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     if (agentPort && tcpPort === 0) {
       websocketHeartbeatJs = new WebsocketHeartbeatJs({
         url: `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/ws?password=${sessionPassword}`,
-        pingTimeout: 5000,
-        pongTimeout: 5000,
+        pingTimeout: 15000,
+        pongTimeout: 10000,
         reconnectTimeout: 1000,
         pingMsg: "heartbeat"
       });
@@ -45,6 +45,9 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       websocketHeartbeatJs.onreconnect = function () {
         setReconnectingAttempt((reconnectingAttempt) => reconnectingAttempt + 1);
         console.log('WorkspacesScreen :: Hearbeat :: Reconnecting');
+      }
+      websocketHeartbeatJs.onerror = function () {
+        console.log('WorkspacesScreen :: Hearbeat :: Error');
       }
     }
     return () => {
