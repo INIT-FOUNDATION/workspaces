@@ -9,10 +9,12 @@ import {
   loggerUtils,
   nodeCacheUtils,
 } from "workspaces-micro-commons";
-import { createProxyMiddleware } from "http-proxy-middleware";
+import { Options, createProxyMiddleware } from "http-proxy-middleware";
 import { proxyMiddleware } from "../api/middleware/proxyMiddleware";
 import { IImage, ISession } from "../types/custom";
 import { proxyService } from "../api/services/proxyService";
+import { Socket } from "net";
+import { ServerResponse } from "http";
 
 export default function (app: Express): void {
   app.use(express.json());
@@ -100,6 +102,15 @@ export default function (app: Express): void {
       return path.replace(`/api/v1/proxy/${sessionId}/${participantId}`, '');
     },
     logger: loggerUtils,
+    onProxyReqWs: (proxyReq: Request, req: Request, socket: Socket, options: Options) => {
+      loggerUtils.info(`routes :: proxyOptions :: WebSocket request: ${req.url}`);
+    },
+    onError: (err: Error, req: Request, res: ServerResponse) => {
+      loggerUtils.error(`routes :: proxyOptions :: WebSocket proxy error: ${err.message}`);
+    },
+    onProxyRes: (proxyRes: ServerResponse, req: Request, res: Response) => {
+      loggerUtils.info(`routes :: proxyOptions :: WebSocket response from target: ${proxyRes.statusCode}`);
+    },
   }
 
   app.use("/api/v1/proxy/:sessionId/:participantId", proxyMiddleware, createProxyMiddleware<Request, Response>(proxyOptions))
