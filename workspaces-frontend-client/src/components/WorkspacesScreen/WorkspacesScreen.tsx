@@ -33,6 +33,10 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     if (agentPort && tcpPort === 0) {
       websocketHeartbeatJs = new WebsocketHeartbeatJs({
         url: `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/ws?password=${sessionPassword}`,
+        pingTimeout: 5000,
+        pongTimeout: 5000,
+        reconnectTimeout: 1000,
+        pingMsg: "heartbeat"
       });
       websocketHeartbeatJs.onopen = function () {
         console.log('WorkspacesScreen :: Hearbeat :: Connected');
