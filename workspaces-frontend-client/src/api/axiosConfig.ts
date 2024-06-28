@@ -35,8 +35,6 @@ api.interceptors.response.use(
         if (error.response && error.response.data && error.response.data) {
             const errorMessage = error.response.data.message;
             toastUtils.error(errorMessage);
-        } else {
-            toastUtils.error('Request failed');
         }
         return Promise.reject(error);
     }
