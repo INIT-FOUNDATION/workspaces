@@ -63,15 +63,19 @@ export default function (app: Express): void {
         const sessionsDetails: ISession[] = await proxyService.getSessionById(sessionId);
         const sessionDetails = sessionsDetails[0];
         const proxyPort = sessionDetails.tcpPort || defaultProxyPort;
+        const openPorts = sessionDetails.tcpPort && sessionDetails.udpPort;
+
         nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId, participantId }, CACHE_TTL.ONE_HOUR);
-        return `http://${environment === "Development" ? "localhost" : sessionId}:${proxyPort}`
+        return `${openPorts ? 'https' : 'http'}://${environment === "Development" ? "localhost" : sessionId}:${proxyPort}`
       } else {
         const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
         if (sessionData && sessionData.sessionId) {
           const sessionsDetails: ISession[] = await proxyService.getSessionById(sessionData.sessionId);
           const sessionDetails = sessionsDetails[0];
           const proxyPort = sessionDetails.tcpPort || defaultProxyPort;
-          return `http://${environment === "Development" ? "localhost" : sessionData.sessionId}:${proxyPort}`
+          const openPorts = sessionDetails.tcpPort && sessionDetails.udpPort;
+
+          return `${openPorts ? 'https' : 'http'}://${environment === "Development" ? "localhost" : sessionData.sessionId}:${proxyPort}`
         }
       }
     } catch (error) {
