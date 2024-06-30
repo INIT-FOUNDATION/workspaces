@@ -8,12 +8,10 @@ import {
   loggerUtils,
   nodeCacheUtils,
 } from "workspaces-micro-commons";
-import { Options, createProxyMiddleware } from "http-proxy-middleware";
+import { createProxyMiddleware } from "http-proxy-middleware";
 import { proxyMiddleware } from "../api/middleware/proxyMiddleware";
-import { IImage, ISession } from "../types/custom";
+import { IAgent, ISession } from "../types/custom";
 import { proxyService } from "../api/services/proxyService";
-import { Socket } from "net";
-import { ServerResponse } from "http";
 
 export default function (app: Express): void {
   app.use(express.json());
@@ -52,30 +50,38 @@ export default function (app: Express): void {
 
   const router = async (req: Request) => {
     try {
-      const defaultProxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080)
-      const environment = envUtils.getStringEnvVariableOrDefault(
-        "NODE_ENV",
-        "Development"
-      );
-
-      if (req && req.params) {
+      const defaultProxyPort = envUtils.getNumberEnvVariableOrDefault("WORKSPACES_PROXY_PORT", 8080);
+      const environment = envUtils.getStringEnvVariableOrDefault("NODE_ENV", "Development");
+  
+      const getSessionDetails = async (sessionId: string): Promise<any> => {
+        const sessionDetails: ISession = await proxyService.getSessionById(sessionId);
+        const agentDetails: IAgent = await proxyService.getAgentById(sessionDetails.agentId);
+        return { ...sessionDetails, ...agentDetails };
+      };
+  
+      const constructUrl = (sessionId: string, proxyPort: number, openPorts: boolean, agentHost: string): string => {
+        const protocol = openPorts ? 'https' : 'http';
+        const host = environment === "Development" ? "localhost" : (openPorts ? agentHost : sessionId);
+        return `${protocol}://${host}:${proxyPort}`;
+      };
+  
+      let sessionDetails
+      if (req?.params?.sessionId) {
         const { sessionId, participantId } = req.params;
-        const sessionsDetails: ISession[] = await proxyService.getSessionById(sessionId);
-        const sessionDetails = sessionsDetails[0];
+        sessionDetails = await getSessionDetails(sessionId);
         const proxyPort = sessionDetails.tcpPort || defaultProxyPort;
-        const openPorts = sessionDetails.tcpPort && sessionDetails.udpPort;
-
+        const openPorts = !!(sessionDetails.tcpPort && sessionDetails.udpPort);
+  
         nodeCacheUtils.setKey('WORKSPACES_CURRENT_SESSION', { sessionId, participantId }, CACHE_TTL.ONE_HOUR);
-        return `${openPorts ? 'https' : 'http'}://${environment === "Development" ? "localhost" : sessionId}:${proxyPort}`
+        return constructUrl(sessionId, proxyPort, openPorts, sessionDetails.agentHost);
       } else {
-        const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION')
-        if (sessionData && sessionData.sessionId) {
-          const sessionsDetails: ISession[] = await proxyService.getSessionById(sessionData.sessionId);
-          const sessionDetails = sessionsDetails[0];
+        const sessionData = await nodeCacheUtils.getKey('WORKSPACES_CURRENT_SESSION');
+        if (sessionData?.sessionId) {
+          sessionDetails = await getSessionDetails(sessionData.sessionId);
           const proxyPort = sessionDetails.tcpPort || defaultProxyPort;
-          const openPorts = sessionDetails.tcpPort && sessionDetails.udpPort;
-
-          return `${openPorts ? 'https' : 'http'}://${environment === "Development" ? "localhost" : sessionData.sessionId}:${proxyPort}`
+          const openPorts = !!(sessionDetails.tcpPort && sessionDetails.udpPort);
+  
+          return constructUrl(sessionData.sessionId, proxyPort, openPorts, sessionDetails.agentHost);
         }
       }
     } catch (error) {
@@ -83,6 +89,7 @@ export default function (app: Express): void {
       throw error;
     }
   };
+  
 
   const proxyOptions = {
     router,

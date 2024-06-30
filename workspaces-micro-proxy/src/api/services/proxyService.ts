@@ -222,8 +222,14 @@ export const proxyService = {
       throw error;
     }
   },
-  getSessionById: async (sessionId: string): Promise<ISession[]> => {
+  getSessionById: async (sessionId: string): Promise<ISession> => {
     try {
+      const key = `ACTIVE_SESSION|ID:${sessionId}`;
+      const cachedData = await redisUtils.getKey(key);
+      if (cachedData) {
+        return JSON.parse(cachedData);
+      }
+
       const sessions: ISession[] =
         await mongoUtils.findDocumentsWithOptions<ISession>(
           SessionModel,
@@ -241,7 +247,8 @@ export const proxyService = {
           },
           {}
         );
-      return sessions;
+      redisUtils.setKey(key, JSON.stringify(sessions[0]), CACHE_TTL.ONE_DAY);
+      return sessions[0];
     } catch (error) {
       loggerUtils.error(
         `proxyService :: getSessionById :: sessionId ${sessionId} :: ${error}`
@@ -522,7 +529,7 @@ export const proxyService = {
       throw error;
     }
   },
-  getAgentById: async (agentId: string): Promise<IAgent[]> => {
+  getAgentById: async (agentId: string): Promise<IAgent> => {
     try {
       const key = `AGENT|ID:${agentId}`;
       const cachedData = await redisUtils.getKey(key);
@@ -547,8 +554,8 @@ export const proxyService = {
           },
           {}
         );
-      redisUtils.setKey(key, JSON.stringify(agents), CACHE_TTL.ONE_DAY);
-      return agents;
+      redisUtils.setKey(key, JSON.stringify(agents[0]), CACHE_TTL.ONE_DAY);
+      return agents[0];
     } catch (error) {
       loggerUtils.error(
         `proxyService :: getAgentById :: agentId ${agentId} :: ${error}`
