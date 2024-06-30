@@ -29,27 +29,25 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   const [reconnectingAttempt, setReconnectingAttempt] = useState<number>(1);
 
   useEffect(() => {
-    let websocketHeartbeatJs: WebsocketHeartbeatJs;
-    if (agentPort && tcpPort === 0) {
-      websocketHeartbeatJs = new WebsocketHeartbeatJs({
-        url: `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/ws?password=${sessionPassword}`,
-        pingTimeout: 15000,
-        pongTimeout: 10000,
-        reconnectTimeout: 1000,
-        pingMsg: "heartbeat"
-      });
-      websocketHeartbeatJs.onopen = function () {
-        console.log('WorkspacesScreen :: Hearbeat :: Connected');
-        websocketHeartbeatJs.send('hello server');
-      }
-      websocketHeartbeatJs.onreconnect = function () {
-        console.log('WorkspacesScreen :: Hearbeat :: Reconnecting');
-      }
-      websocketHeartbeatJs.onerror = function () {
-        setReconnectingAttempt((reconnectingAttempt) => reconnectingAttempt + 1);
-        console.log('WorkspacesScreen :: Hearbeat :: Error');
-      }
+    let websocketHeartbeatJs = new WebsocketHeartbeatJs({
+      url: reconnectingAttempt === 1 ? `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${tcpPort}/ws?password=${sessionPassword}` : `${agentSSLEnabled ? "wss" : "ws"}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/ws?password=${sessionPassword}`,
+      pingTimeout: 15000,
+      pongTimeout: 10000,
+      reconnectTimeout: 1000,
+      pingMsg: "heartbeat"
+    });
+    websocketHeartbeatJs.onopen = function () {
+      console.log('WorkspacesScreen :: Hearbeat :: Connected');
+      websocketHeartbeatJs.send('hello server');
     }
+    websocketHeartbeatJs.onreconnect = function () {
+      console.log('WorkspacesScreen :: Hearbeat :: Reconnecting');
+    }
+    websocketHeartbeatJs.onerror = function () {
+      setReconnectingAttempt((reconnectingAttempt) => reconnectingAttempt + 1);
+      console.log('WorkspacesScreen :: Hearbeat :: Error');
+    }
+
     return () => {
       if (websocketHeartbeatJs) websocketHeartbeatJs.close();
     };
@@ -57,14 +55,14 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
 
   useEffect(() => {
     showLoader();
-
     const createUrl = () => {
       const scheme = agentSSLEnabled ? "https" : "http";
       const rand = Math.floor(Math.random() * 1000000) + 1;
-      if (tcpPort && tcpPort > 0) {
+      if (tcpPort && tcpPort > 0 && reconnectingAttempt === 1) {
         return `${scheme}://${agentHost}:${tcpPort}/?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
+      } else {
+        return `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
       }
-      return `${scheme}://${agentHost}:${agentPort}/api/v1/proxy/${sessionId}/${participantId}/?cast=1&usr=${sessionUserName}&pwd=${sessionPassword}&uid=${rand}`;
     };
 
     const iframeElement = document.createElement("iframe");
