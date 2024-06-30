@@ -24,6 +24,7 @@ const Workspaces: React.FC = () => {
     sslEnabled: false,
     drawCursors: false,
     tcpPort: 0,
+    udpPort: 0,
     sessionUserName: "",
     sessionPassword: "",
     sessionStatus: 0,
@@ -141,6 +142,7 @@ const Workspaces: React.FC = () => {
     sslEnabled,
     drawCursors,
     tcpPort,
+    udpPort,
     sessionUserName,
     sessionPassword,
     sessionStatus,
@@ -159,6 +161,7 @@ const Workspaces: React.FC = () => {
             agentSSLEnabled={sslEnabled}
             access={access}
             tcpPort={tcpPort}
+            udpPort={udpPort}
             sessionUserName={sessionUserName}
             sessionPassword={sessionPassword}
           />

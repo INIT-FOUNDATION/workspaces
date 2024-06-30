@@ -10,6 +10,7 @@ interface WorkspacesScreenProps {
   agentSSLEnabled: boolean;
   access: string;
   tcpPort: number;
+  udpPort: number;
   sessionUserName: string;
   sessionPassword: string;
 }
@@ -26,7 +27,14 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   sessionPassword,
 }) => {
   const { showLoader, hideLoader } = useLoader();
-  const [reconnectingAttempt, setReconnectingAttempt] = useState<number>(1);
+  const [reconnectingAttempt, setReconnectingAttempt] = useState(() => {
+    const storedAttempt = sessionStorage.getItem('workspaces:reconnectingAttempt');
+    return storedAttempt ? parseInt(storedAttempt, 10) : 1;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('reconnectingAttempt', reconnectingAttempt.toString());
+  }, [reconnectingAttempt]);
 
   useEffect(() => {
     let websocketHeartbeatJs = new WebsocketHeartbeatJs({
