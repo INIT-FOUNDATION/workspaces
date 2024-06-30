@@ -58,14 +58,14 @@ export const agentsController = {
       .status(HTTP_STATUS_CODES.BAD_REQUEST)
       .send(AGENT_ERROR_RESPONSES.AGENTERR002);
   
-      const agents: IAgent[] = await agentsService.getAgentById(agentId)
+      const agent: IAgent = await agentsService.getAgentById(agentId)
 
-      if (agents.length == 0) return res
+      if (!agent) return res
       .status(HTTP_STATUS_CODES.BAD_REQUEST)
       .send(AGENT_ERROR_RESPONSES.AGENTERR003);
   
       return res.status(HTTP_STATUS_CODES.OK).send({
-        data: { agent: agents[0] },
+        data: { agent },
         message: `Agent Fetched Successfully`,
       });
     } catch (error) {

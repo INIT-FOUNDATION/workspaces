@@ -33,7 +33,7 @@ export const agentsService = {
       throw error;
     }
   },
-  getAgentById: async (agentId: string): Promise<IAgent[]> => {
+  getAgentById: async (agentId: string): Promise<IAgent> => {
     try {
       const key = `AGENT|ID:${agentId}`;
       const cachedData = await redisUtils.getKey(key);
@@ -58,8 +58,8 @@ export const agentsService = {
           },
           {}
         );
-      redisUtils.setKey(key, JSON.stringify(agents), CACHE_TTL.ONE_DAY);
-      return agents;
+      redisUtils.setKey(key, JSON.stringify(agents[0]), CACHE_TTL.ONE_DAY);
+      return agents[0];
     } catch (error) {
       loggerUtils.error(
         `agentsService :: getAgentById :: agentId ${agentId} :: ${error}`
