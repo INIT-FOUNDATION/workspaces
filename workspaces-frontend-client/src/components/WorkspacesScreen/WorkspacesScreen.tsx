@@ -43,10 +43,10 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
         websocketHeartbeatJs.send('hello server');
       }
       websocketHeartbeatJs.onreconnect = function () {
-        setReconnectingAttempt((reconnectingAttempt) => reconnectingAttempt + 1);
         console.log('WorkspacesScreen :: Hearbeat :: Reconnecting');
       }
       websocketHeartbeatJs.onerror = function () {
+        setReconnectingAttempt((reconnectingAttempt) => reconnectingAttempt + 1);
         console.log('WorkspacesScreen :: Hearbeat :: Error');
       }
     }
