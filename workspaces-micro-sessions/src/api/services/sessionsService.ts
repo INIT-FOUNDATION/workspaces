@@ -115,6 +115,7 @@ export const sessionService = {
             agentPort: availableAgent.agentPort,
             sslEnabled: availableAgent.sslEnabled,
             tcpPort: sessionDetails.tcpPort,
+            udpPort: sessionDetails.udpPort,
             sessionUserName: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? "admin" : "neko",
             sessionPassword: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? sessionDetails.adminPassword : sessionDetails.userPassword
           };
@@ -186,6 +187,7 @@ export const sessionService = {
         agentPort: agent.agentPort,
         sslEnabled: agent.sslEnabled,
         tcpPort: existingSessionData.tcpPort,
+        udpPort: existingSessionData.udpPort,
         sessionUserName: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? "admin" : "neko",
         sessionPassword: envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_SESSIONS_USE_ADMIN", true) ? existingSessionData.adminPassword : existingSessionData.userPassword
       };
