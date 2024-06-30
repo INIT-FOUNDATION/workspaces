@@ -31,7 +31,7 @@ export const proxyService = {
           `DARK_MODE=${proxyDetails.darkMode ? '--force-dark-mode' : '--disable-features=DarkMode'}`,
         ]
 
-        if (!openPorts && envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_ENABLE_TURN_SUPPORT", false)) {
+        if (envUtils.getBooleanEnvVariableOrDefault("WORKSPACES_ENABLE_TURN_SUPPORT", false)) {
           const iceServers = [
             {
               "urls": ["stun:turn.orrizonte.in"]
