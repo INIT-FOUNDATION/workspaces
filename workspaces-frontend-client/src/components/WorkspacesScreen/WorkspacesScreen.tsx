@@ -33,7 +33,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
   });
 
   useEffect(() => {
-    sessionStorage.setItem('reconnectingAttempt', reconnectingAttempt.toString());
+    sessionStorage.setItem('workspaces:reconnectingAttempt', reconnectingAttempt.toString());
   }, [reconnectingAttempt]);
 
   useEffect(() => {
@@ -73,19 +73,7 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
       }
     };
 
-    const iframeElement = document.createElement("iframe");
-
-    iframeElement.src = createUrl();
-    iframeElement.style.position = "absolute";
-    iframeElement.style.width = "100%";
-    iframeElement.style.height = "100%";
-    iframeElement.style.top = "0";
-    iframeElement.style.left = "0";
-    iframeElement.style.right = "0";
-    iframeElement.style.bottom = "0";
-    iframeElement.style.overflow = "hidden";
-    iframeElement.style.pointerEvents = access === "read" ? "none" : "auto";
-    iframeElement.style.border = "none";
+    const iframeElement = document.getElementById("workspace-iframe") as HTMLIFrameElement;
 
     const handleLoad = () => {
       hideLoader();
@@ -99,27 +87,23 @@ const WorkspacesScreen: React.FC<WorkspacesScreenProps> = ({
     iframeElement.addEventListener("load", handleLoad);
     iframeElement.addEventListener("error", handleError);
 
-    const container = document.createElement("div");
-
-    container.style.position = "fixed";
-    container.style.top = "0";
-    container.style.left = "0";
-    container.style.width = "100%";
-    container.style.height = "100%";
-    container.style.overflow = "hidden";
-
-    container.appendChild(iframeElement);
-
-    document.body.appendChild(container);
+    iframeElement.src = createUrl();
+    iframeElement.style.pointerEvents = access === "read" ? "none" : "auto";
 
     return () => {
       iframeElement.removeEventListener("load", handleLoad);
       iframeElement.removeEventListener("error", handleError);
-      document.body.removeChild(container);
     };
   }, [access, reconnectingAttempt]);
 
-  return null;
+  return (
+    <div style={{ position: "fixed", top: "0", left: "0", width: "100%", height: "100%", overflow: "hidden" }}>
+      <iframe
+        id="workspace-iframe"
+        style={{ position: "absolute", width: "100%", height: "100%", top: "0", left: "0", right: "0", bottom: "0", overflow: "hidden", border: "none" }}
+      />
+    </div>
+  );
 };
 
 export default WorkspacesScreen;
